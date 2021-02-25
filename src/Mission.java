@@ -112,18 +112,18 @@ public class Mission implements Runnable{
 
     }
 
-    // simulate 10% chance of failure
-    private boolean checkComponentFailure(){
-        boolean check = false;
+    private boolean checkComponentFailure(Mission missionName){                               //TODO GroundControl might take this function
+        boolean check = false;                                                                //TODO GC checks failure? Mission returns variable day and sofware size
         System.out.println(missionName + ": Performing Component Check");
 
         // no error occured
         if (random.nextInt(10) == 0) {
-            System.out.println("Component check complete, no errors");    
+            System.out.println("Component check complete, no errors"); 
         }
         else {
             System.out.println("Warning, component has Failed! Checking for resolution."); 
-            checkforResolution();   
+            // try to recover with 25% chance
+            check = true;
         }
 
         return check;
@@ -133,12 +133,14 @@ public class Mission implements Runnable{
         boolean resolved = false;
 
         // no error occured
-        if (random.nextInt(25) == 0) {
-            System.out.println("Component check complete, no errors");    
+        if (random.nextInt(100) < 25) {                                                      //TODO 25% chance of success.
+
+            //
+            System.out.println("Component check complete, no errors");
+            // restart mission
         }
         else {
             System.out.println("Warning, component has Failed! Checking for resolution."); 
-            checkforResolution();   
         }
 
         return resolved;

@@ -1,6 +1,10 @@
 import java.util.Random;
-
-public class Component {
+    
+    // this.startTime;
+    // this.componentsList;
+    // this.detination;
+    // this.network;
+    // this.id;    
     
     //====================================================================================================
     // All mission components transmit reports (telemetry) on progress and instruments send data on a regular basis, but this is limited by
@@ -13,8 +17,11 @@ public class Component {
 
     //Each component should have a random report rate and size for the mission.
 
+    // fuel supply decides the destination
     public int fuel(){
         // todo
+        // assign a random fuel level in a range
+        // the fuel level decides the destination
     }
 
     public int thrusters(){
