@@ -1,35 +1,47 @@
 import java.util.Random;
+import java.util.ArrayList;
 
 // Each mission is allocated variable supplies of 
 // fuel, thrusters, instruments, control systems and powerplants.
 public class Mission implements Runnable{
-    // Each mission can be represented using threads
-    private String threadName;
-    private Integer fuelLevel;
-    private Integer thrusters;
-    private Integer controlSystems;
-    private Integer powerPlants;
-    private String missionDestination;
-    private String stage;
+    private String missionName;
+    private long startTime;
+    private ArrayList<String> components;
+    private String destination;
+    private String network;
+    private final int id;
+
+    // private int fuelLevel;
+    // private int thrusters;
+    // private final int instruments;
+    // private int controlSystems;
+    // private int powerPlants;
+    // private String stage;
 
     Random random = new Random();
     Component missionComponent = new Component();
 
-    public static void main(String[] args){
-        Mission spaceMission = new Mission("Space Mission");
-        Thread t = new Thread (spaceMission, spaceMission.threadName);
-        t.start();
-    }
-
     // The mission destination can be approximated as a function of the fuel load for the mission (ie more
     // fuel implies a mission to further locations in the solar system).
-    public Mission(String name){
-        this.threadName = name;
-        this.fuelLevel = missionComponent.fuel();
-        this.thrusters = missionComponent.thrusters();
-        this.controlSystems = missionComponent.controlSystems();
-        this.powerPlants = missionComponent.powerPlants();
-        this.missionDestination = this.calculateMissionDestination();
+    public Mission(String name, long startTime, ArrayList<String> components, String destination, String network, int id){
+        this.missionName = name;
+        // this.fuelLevel = missionComponent.fuel();
+        // this.thrusters = missionComponent.thrusters();
+        // this.controlSystems = missionComponent.controlSystems();
+        // this.powerPlants = missionComponent.powerPlants();
+        // this.destination = this.calculateMissionDestination();
+        this.startTime = startTime;
+        this.components = components;
+        this.destination = destination;
+        this.network = network;
+        this.id = id;
+    }
+
+    public static void main(String[] args){
+        // Each mission can be represented using threads
+        // Mission spaceMission = new Mission("Space Mission");
+        // Thread t = new Thread (spaceMission, spaceMission.missionName);
+        // t.start();
     }
 
     public void run(){
@@ -52,16 +64,24 @@ public class Mission implements Runnable{
         }
     }
 
-    private String calculateMissionDestination(){
+    public int getMissionId(){
+        return this.id;
+    }
+
+    public double getStartTime(){
+        return this.startTime;
+    }
+
+    // private String calculateMissionDestination(){
         // todo
         // The mission destination can be approximated as a function of the fuel load for the mission 
         // (ie more fuel implies a mission to further locations in the solar system).
-    }
+    // }
 
     // instant event.
     // 10% chance of failing.
     private void boostStage(){
-        System.out.println(threadName + ": Starting Boost Stage");
+        System.out.println(missionName + ": Starting Boost Stage");
         checkComponentFailure();
 
     }
@@ -70,7 +90,7 @@ public class Mission implements Runnable{
     // 10% chance of failing.
     // todo pass argument int months
     private void transitStage(){
-        System.out.println(threadName + ": Starting Transit Stage");
+        System.out.println(missionName + ": Starting Transit Stage");
         checkComponentFailure();
 
     }
@@ -78,7 +98,7 @@ public class Mission implements Runnable{
     // instant event.
     // 10% chance of failing.
     private void landingStage(){
-        System.out.println(threadName + ": Starting Landing Stage");
+        System.out.println(missionName + ": Starting Landing Stage");
         checkComponentFailure();
 
     }
@@ -87,7 +107,7 @@ public class Mission implements Runnable{
     // 10% chance of failing.
     // todo passing parameter int months
     private void explorationStage(){
-        System.out.println(threadName + ": Starting Exploration Stage");
+        System.out.println(missionName + ": Starting Exploration Stage");
         checkComponentFailure();
 
     }
@@ -95,7 +115,7 @@ public class Mission implements Runnable{
     // simulate 10% chance of failure
     private boolean checkComponentFailure(){
         boolean check = false;
-        System.out.println(threadName + ": Performing Component Check");
+        System.out.println(missionName + ": Performing Component Check");
 
         // no error occured
         if (random.nextInt(10) == 0) {
