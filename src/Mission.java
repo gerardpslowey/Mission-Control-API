@@ -5,7 +5,7 @@ import java.util.Queue;
 public class Mission implements Runnable{
     private Random random = new Random();
 
-    private String missionName;
+    private int missionID;
     private long startTime;
     private ArrayList<String> components;
     private int destination;
@@ -15,7 +15,6 @@ public class Mission implements Runnable{
     private int powerPlants;
     private String stage;
     private Queue network;
-    private final int id;
 
     // fuelLevel, thrusters, instruments, controlSystems, powerPlants
     Component missionComponent = new Component();
@@ -23,14 +22,14 @@ public class Mission implements Runnable{
 
     // The mission destination can be approximated as a function of the fuel load for the mission (ie more
     // fuel implies a mission to further locations in the solar system).
-    public Mission(long startTime, int destination, String network, int id){
-        this.id = id;
+    public Mission(int missionID, long startTime, int destination) {
+        this.missionID = missionID;
         this.startTime = startTime;
         this.fuelLevel = missionComponent.fuel();
         this.thrusters = missionComponent.thrusters();
         this.controlSystems = missionComponent.controlSystems();
         this.powerPlants = missionComponent.powerPlants();
-        this.destination = destination;
+        this.destination = this.calculateMissionDestination(this);
         this.network = comsNetwork.calculateBandwidth();
     }
 
@@ -39,7 +38,7 @@ public class Mission implements Runnable{
     }
 
     public void start(String threadName) {
-        System.out.println("Starting " +  threadName );
+        System.out.println("Starting " +  threadName);
          
         Thread t = new Thread(this, threadName);
         t.start ();
@@ -66,19 +65,17 @@ public class Mission implements Runnable{
     }
 
     public int getMissionId(){
-        return this.id;
+        return this.missionID;
     }
 
     public double getStartTime(){
         return this.startTime;
     }
 
-
-
     // instant event.
     // 10% chance of failing.
     private void boostStage(Mission missionID){
-        System.out.println(this.id + ": Starting Boost Stage");
+        System.out.println(this.missionID + ": Starting Boost Stage");
         checkComponentFailure(missionID);
 
     }
@@ -87,7 +84,7 @@ public class Mission implements Runnable{
     // 10% chance of failing.
     // todo pass argument int months
     private void transitStage(Mission missionID){
-        System.out.println(this.id + ": Starting Transit Stage");
+        System.out.println(this.missionID + ": Starting Transit Stage");
         checkComponentFailure(missionID);
 
     }
@@ -95,7 +92,7 @@ public class Mission implements Runnable{
     // instant event.
     // 10% chance of failing.
     private void landingStage(Mission missionID){
-        System.out.println(this.id + ": Starting Landing Stage");
+        System.out.println(this.missionID + ": Starting Landing Stage");
         checkComponentFailure(missionID);
 
     }
@@ -104,9 +101,20 @@ public class Mission implements Runnable{
     // 10% chance of failing.
     // todo passing parameter int months
     private void explorationStage(Mission missionID){
-        System.out.println(this.id + ": Starting Exploration Stage");
+        System.out.println(this.missionID + ": Starting Exploration Stage");
         checkComponentFailure(missionID);
+    }
 
+    private int calculateMissionDestination(Mission spaceMission){
+        // The mission destination can be approximated as a function of the fuel load for the mission 
+        // (ie more fuel implies a mission to further locations in the solar system).
+        int missionFuelLevel = spaceMission.fuelLevel;
+
+        // always keep a fuel reserve of 25% of fuelLevel
+        int reserveFuel = (int)(missionFuelLevel*(75.0f/100.0f));
+        int usableFuel = missionFuelLevel - reserveFuel;
+
+        return usableFuel / 2;
     }
 
     private boolean checkComponentFailure(Mission missionID){                               //TODO GroundControl might take this function
@@ -141,5 +149,10 @@ public class Mission implements Runnable{
         }
 
         return resolved;
+    }
+
+    // A variable burst of reports and commands are sent at the transition between mission stages
+    public void changeMissionStage(Mission missionID){
+        // TODO
     }
 }

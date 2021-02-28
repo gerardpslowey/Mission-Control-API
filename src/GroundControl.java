@@ -1,28 +1,15 @@
-import java.time.LocalTime;
-
 public class GroundControl {
 
-    // Each "mission" should be generated with a random start time, components list, destination, network and
-    // have a unique ID for identification purposes.
-
     private static final int MIN_MISSION_COUNT = 10;
+    private static long startTime = System.currentTimeMillis();
 
-    public GroundControl(){
-        // need these variables
-        // this.startTime = startTime;
-        // this.components = components;
-        // this.destination = destination;
-        // this.network = network;
-        // this.id = id;
-    }
 
-    // execution order
+    
     public static void main(String[] args){
         // Each mission can be represented using threads
         // Thread t = new Thread (spaceMission, spaceMission.missionName);
         // t.start();
 
-        LocalTime currentTime = java.time.LocalTime.now();
 
         int i = 1;
         while (i < 4) {
@@ -33,27 +20,31 @@ public class GroundControl {
             spaceMission.start();
             i++;
 
+        // // simulate 10% chance of failure
+        // boolean failure = Mission().checkComponentFailure(Mission missionName);
+        // if(failure){
+        //     produceSoftwarePatch();
     }
 
-    private int calculateMissionDestination(Mission spaceMission){
-        // todo
-        // The mission destination can be approximated as a function of the fuel load for the mission 
-        // (ie more fuel implies a mission to further locations in the solar system).
-    }
-
-    // simulate 10% chance of failure
-    boolean failure = Mission().checkComponentFailure(Mission missionName);
-    if(failure){
+    // TODO decide the random ranges here
+    public static void produceSoftwarePatch() {
         int numDays = random;
         int softwareSize = random;
-        transmitSoftwareUpdate(numDays, softwareSize);
+
+        transmitSoftwareUpdate();
     }
 
     // Software upgrades must be transmitted from the mission controller.
-    public static void transmitSoftwareUpdate(){
-        //todo
+    public static void transmitSoftwareUpdate(int ){
         // takes a variable number of days to develop
         // variable size in mb
         // related to the bandwidth queue
     }
+
+    // 30% of reports require a command response and the mission is paused until that command is received. 
+    public static void sendCommandResponse() {
+
+    }
+
+    
 }
