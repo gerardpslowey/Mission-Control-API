@@ -9,10 +9,12 @@ public class Mission implements Runnable{
     private long startTime;
     private ArrayList<String> components;
     private int destination;
-    private int fuelLevel;
-    private int thrusters;
-    private int controlSystems;
-    private int powerPlants;
+
+    private static volatile int fuelLevel;               //TODO: This should be static as it needs to be topped up and changed often.
+    private static int thrusters;
+    private static int controlSystems;
+    private static int powerPlants;
+    
     private String stage;
     private Queue network;
     private final int id;
@@ -23,15 +25,17 @@ public class Mission implements Runnable{
 
     // The mission destination can be approximated as a function of the fuel load for the mission (ie more
     // fuel implies a mission to further locations in the solar system).
-    public Mission(long startTime, int destination, String network, int id){
+    public Mission(long startTime, int destination, int id){
         this.id = id;
         this.startTime = startTime;
-        this.fuelLevel = missionComponent.fuel();
-        this.thrusters = missionComponent.thrusters();
-        this.controlSystems = missionComponent.controlSystems();
-        this.powerPlants = missionComponent.powerPlants();
         this.destination = destination;
-        this.network = comsNetwork.calculateBandwidth();
+
+        fuelLevel = missionComponent.fuel();
+        thrusters = missionComponent.thrusters();
+        controlSystems = missionComponent.controlSystems();
+        powerPlants = missionComponent.powerPlants();
+
+        network = comsNetwork.calculateBandwidth();
     }
 
     public static void main(String[] args){
@@ -40,7 +44,6 @@ public class Mission implements Runnable{
 
     public void start(String threadName) {
         System.out.println("Starting " +  threadName );
-         
         Thread t = new Thread(this, threadName);
         t.start ();
     }
