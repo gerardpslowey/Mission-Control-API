@@ -8,11 +8,13 @@ public class Mission implements Runnable{
     private int missionID;
     private long startTime;
     private ArrayList<String> components;
+
     private int destination;
     private int fuelLevel;
     private int thrusters;
     private int controlSystems;
     private int powerPlants;
+
     private String stage;
     private Queue network;
 
@@ -22,14 +24,16 @@ public class Mission implements Runnable{
 
     // The mission destination can be approximated as a function of the fuel load for the mission (ie more
     // fuel implies a mission to further locations in the solar system).
-    public Mission(int missionID, long startTime, int destination) {
+    public Mission(int missionID, long startTime) {
         this.missionID = missionID;
         this.startTime = startTime;
+        this.destination = this.calculateMissionDestination(this);
+        
         this.fuelLevel = missionComponent.fuel();
         this.thrusters = missionComponent.thrusters();
         this.controlSystems = missionComponent.controlSystems();
         this.powerPlants = missionComponent.powerPlants();
-        this.destination = this.calculateMissionDestination(this);
+
         this.network = comsNetwork.calculateBandwidth();
     }
 
@@ -111,7 +115,7 @@ public class Mission implements Runnable{
         int missionFuelLevel = spaceMission.fuelLevel;
 
         // always keep a fuel reserve of 25% of fuelLevel
-        int reserveFuel = (int)(missionFuelLevel*(75.0f/100.0f));
+        int reserveFuel = (int)(missionFuelLevel*(15.0f/100.0f));
         int usableFuel = missionFuelLevel - reserveFuel;
 
         return usableFuel / 2;
