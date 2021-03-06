@@ -24,19 +24,4 @@ public class GroundControl {
 			missionPool.execute(missions[i]);
 		}
     }
-
-
-    // When a stage fails then a software patch must be sent.
-    // takes a variable number of days to develop
-    // variable size in mb
-    // related to the bandwidth queue
-    public static void produceSoftwarePatch() {
-        long numDays = (long)(Math.random() * 300);
-        int softwareSize = 5;                               //TODO: random software size
-    }
-
-    // 30% of reports require a command response and the mission is paused until that command is received. 
-    public static void sendCommandResponse() {
-
-    }    
 }
