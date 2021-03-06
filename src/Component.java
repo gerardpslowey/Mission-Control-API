@@ -14,28 +14,28 @@ public class Component {
     // Each mission is allocated variable supplies of 
     // fuel, thrusters, instruments, control systems and powerplants.
 
+    private String name;
     private Integer reportRate;
     private Integer size;
 
-    public Component(){
-        this.reportRate = setReportRate();            //TODO: Randomly allocated
-        this.size = 5;                                  //TODO: Randomly allocated
+    public Component(String name){
+        this.name = name;
+        this.reportRate = setRandomInt();            //TODO: Randomly allocated
+        this.size = setRandomInt();                                  //TODO: Randomly allocated
     }
     
-    public static int setReportRate() {
+    public static int setRandomInt() {
         final int MIN_LIMIT = 20;
         final int MAX_LIMIT = 200;
         return ThreadLocalRandom.current().nextInt(MIN_LIMIT, MAX_LIMIT);
     }
 
+    public String getName(){
+        return name;
+    }
+    
     public int getReportRate(){
         return reportRate;
-    }
-
-    public static int setSize() {
-        final int MIN_LIMIT = 20;
-        final int MAX_LIMIT = 200;
-        return ThreadLocalRandom.current().nextInt(MIN_LIMIT, MAX_LIMIT);
     }
 
     public int getSize(){

@@ -4,7 +4,7 @@ import java.util.Queue;
 public class Mission implements Runnable {
     private Random random = new Random();
 
-    private String missionID;
+    private String id;
     private long startTime;
 
     private Integer destination;
@@ -19,48 +19,55 @@ public class Mission implements Runnable {
     // fuelLevel, thrusters, instruments, controlSystems, powerPlants
     Network comsNetwork = new Network();
 
-    public Mission(String missionID, long startTime) {
-        this.missionID = missionID;
+    public Mission(String id, long startTime) {
+        this.id = id;
         this.startTime = startTime;
         
-        this.fuelLevel = new Component();
-        this.thrusters = new Component();
-        this.controlSystems = new Component();
-        this.powerPlants = new Component();
+        this.fuelLevel = new Component("fuel");
+        this.thrusters = new Component("thrusters");
+        this.controlSystems = new Component("controlSys");
+        this.powerPlants = new Component("powerPlant");
 
         this.destination = fuelLevel.getSize(); //this.fuelLevel;              //TODO: The mission destination can be approximated as a function of the fuel load          
         this.network = comsNetwork.calculateBandwidth();
-    }
-
-    public void start(String threadName) {
-        System.out.println("Starting " +  threadName);
-        Thread t = new Thread(this, threadName);
-        t.start ();
+        this.stage = "boost";
     }
 
     @Override
-    public void run() {
+    public void run(){
+        System.out.println("Starting " +  id);
+        //changeStage
+        //checkFailure
+        //requestSoftwarePatch
+        //sendCommandResponse
+        
+    }
+
+
+    public void changeStage() {
         switch(stage) {
-            case "Boost Stage":
+            case "boost": case "b":
                 boostStage();
                 break;
 
-            case "Transit Stage":
+            case "transit": case "t":
                 transitStage(5);        //TODO: variable amount of months ===> 1000 < x
                 break;
 
-            case "Landing Stage":
+            case "landing": case "l":
                 landingStage();
                 break;
 
-            default:
+            case "explore": case "e":
                 explorationStage(5);
-                break;            
+                break;    
+            default:
+            System.out.println("Invalid Argument: " + stage);       
         }
     }
 
-    public String getMissionId(){
-        return missionID;
+    public String getid(){
+        return id;
     }
 
     public long getStartTime(){
@@ -69,40 +76,44 @@ public class Mission implements Runnable {
 
     // instant event.
     private void boostStage(){
-        System.out.println(this.missionID + ": Starting Boost Stage");
+        System.out.println(this.id + ": Starting Boost Stage");
 
         // 10% chance of failing.
         checkComponentFailure();
+        changeMissionStage();
     }
 
     // variable amounts of time to execute (in months)
     private void transitStage(int months){
-        System.out.println(this.missionID + ": Starting Transit Stage");
+        System.out.println(this.id + ": Starting Transit Stage");
 
         // 10% chance of failing.
         checkComponentFailure();
+        changeMissionStage();
     }
 
     // instant event.
     private void landingStage(){
-        System.out.println(this.missionID + ": Starting Landing Stage");
+        System.out.println(this.id + ": Starting Landing Stage");
 
         // 10% chance of failing.
         checkComponentFailure();
+        changeMissionStage();
 
     }
 
     // variable amounts of time to execute (in months)
     private void explorationStage(Integer months){
-        System.out.println(this.missionID + ": Starting Exploration Stage");
+        System.out.println(this.id + ": Starting Exploration Stage");
         
         // 10% chance of failing.
         checkComponentFailure();
+        changeMissionStage();
     }
 
     private boolean checkComponentFailure(){                                        //TODO GroundControl might take this function
         boolean check = false;                                                      //TODO GC checks failure? Mission returns variable day and sofware size
-        System.out.println(missionID + ": Performing Component Check");
+        System.out.println(id + ": Performing Component Check");
 
         // no error occured
         if (random.nextInt(10) == 0) {
@@ -135,7 +146,7 @@ public class Mission implements Runnable {
     }
 
     // A variable burst of reports and commands are sent at the transition between mission stages
-    public void changeMissionStage(Mission missionID){
+    public void changeMissionStage(){
         // TODO
     }
 }
