@@ -1,128 +1,107 @@
 import java.util.Random;
-import java.util.ArrayList;
 import java.util.Queue;
 
-public class Mission implements Runnable{
+public class Mission implements Runnable {
     private Random random = new Random();
 
-    private int missionID;
+    private String missionID;
     private long startTime;
-    private ArrayList<String> components;
 
-    private int destination;
-    private int fuelLevel;
-    private int thrusters;
-    private int controlSystems;
-    private int powerPlants;
+    private Integer destination;
+    private Component fuelLevel;
+    private Component thrusters;
+    private Component controlSystems;
+    private Component powerPlants;
 
     private String stage;
     private Queue network;
 
     // fuelLevel, thrusters, instruments, controlSystems, powerPlants
-    Component missionComponent = new Component();
     Network comsNetwork = new Network();
 
-    // The mission destination can be approximated as a function of the fuel load for the mission (ie more
-    // fuel implies a mission to further locations in the solar system).
-    public Mission(int missionID, long startTime) {
+    public Mission(String missionID, long startTime) {
         this.missionID = missionID;
         this.startTime = startTime;
-        this.destination = this.calculateMissionDestination(this);
         
-        this.fuelLevel = missionComponent.fuel();
-        this.thrusters = missionComponent.thrusters();
-        this.controlSystems = missionComponent.controlSystems();
-        this.powerPlants = missionComponent.powerPlants();
+        this.fuelLevel = new Component();
+        this.thrusters = new Component();
+        this.controlSystems = new Component();
+        this.powerPlants = new Component();
 
+        this.destination = fuelLevel.getSize(); //this.fuelLevel;              //TODO: The mission destination can be approximated as a function of the fuel load          
         this.network = comsNetwork.calculateBandwidth();
-    }
-
-    public static void main(String[] args){
-        // TODO
     }
 
     public void start(String threadName) {
         System.out.println("Starting " +  threadName);
-         
         Thread t = new Thread(this, threadName);
         t.start ();
     }
 
-    public void run(Mission missionID) {
+    @Override
+    public void run() {
         switch(stage) {
             case "Boost Stage":
-                boostStage(missionID);
+                boostStage();
                 break;
 
             case "Transit Stage":
-                transitStage(missionID);
+                transitStage(5);        //TODO: variable amount of months ===> 1000 < x
                 break;
 
             case "Landing Stage":
-                landingStage(missionID);
+                landingStage();
                 break;
 
-            case "Exploration Stage":
-                explorationStage(missionID);
+            default:
+                explorationStage(5);
                 break;            
         }
     }
 
-    public int getMissionId(){
-        return this.missionID;
+    public String getMissionId(){
+        return missionID;
     }
 
-    public double getStartTime(){
-        return this.startTime;
+    public long getStartTime(){
+        return startTime;
     }
 
     // instant event.
-    // 10% chance of failing.
-    private void boostStage(Mission missionID){
+    private void boostStage(){
         System.out.println(this.missionID + ": Starting Boost Stage");
-        checkComponentFailure(missionID);
 
+        // 10% chance of failing.
+        checkComponentFailure();
     }
 
     // variable amounts of time to execute (in months)
-    // 10% chance of failing.
-    // todo pass argument int months
-    private void transitStage(Mission missionID){
+    private void transitStage(int months){
         System.out.println(this.missionID + ": Starting Transit Stage");
-        checkComponentFailure(missionID);
 
+        // 10% chance of failing.
+        checkComponentFailure();
     }
 
     // instant event.
-    // 10% chance of failing.
-    private void landingStage(Mission missionID){
+    private void landingStage(){
         System.out.println(this.missionID + ": Starting Landing Stage");
-        checkComponentFailure(missionID);
+
+        // 10% chance of failing.
+        checkComponentFailure();
 
     }
 
     // variable amounts of time to execute (in months)
-    // 10% chance of failing.
-    // todo passing parameter int months
-    private void explorationStage(Mission missionID){
+    private void explorationStage(Integer months){
         System.out.println(this.missionID + ": Starting Exploration Stage");
-        checkComponentFailure(missionID);
+        
+        // 10% chance of failing.
+        checkComponentFailure();
     }
 
-    private int calculateMissionDestination(Mission spaceMission){
-        // The mission destination can be approximated as a function of the fuel load for the mission 
-        // (ie more fuel implies a mission to further locations in the solar system).
-        int missionFuelLevel = spaceMission.fuelLevel;
-
-        // always keep a fuel reserve of 25% of fuelLevel
-        int reserveFuel = (int)(missionFuelLevel*(15.0f/100.0f));
-        int usableFuel = missionFuelLevel - reserveFuel;
-
-        return usableFuel / 2;
-    }
-
-    private boolean checkComponentFailure(Mission missionID){                               //TODO GroundControl might take this function
-        boolean check = false;                                                                //TODO GC checks failure? Mission returns variable day and sofware size
+    private boolean checkComponentFailure(){                                        //TODO GroundControl might take this function
+        boolean check = false;                                                      //TODO GC checks failure? Mission returns variable day and sofware size
         System.out.println(missionID + ": Performing Component Check");
 
         // no error occured
@@ -138,7 +117,7 @@ public class Mission implements Runnable{
         return check;
     }
 
-    private boolean checkforResolution(Mission missionID){
+    private boolean checkforResolution(){
         boolean resolved = false;
 
         // no error occured

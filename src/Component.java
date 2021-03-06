@@ -14,45 +14,33 @@ public class Component {
     // Each mission is allocated variable supplies of 
     // fuel, thrusters, instruments, control systems and powerplants.
 
-    public static void main(String[] args){
-        System.out.println(fuel());
+    private Integer reportRate;
+    private Integer size;
+
+    public Component(){
+        this.reportRate = setReportRate();            //TODO: Randomly allocated
+        this.size = 5;                                  //TODO: Randomly allocated
     }
     
-    public static int fuel() {
-        // assign a random fuel level in a range
-        // the fuel level decides the destination
-        final int MAX_FUEL_LIMIT = 200;
-        final int MIN_FUEL_LIMIT = 20;
-
-        return ThreadLocalRandom.current().nextInt(MIN_FUEL_LIMIT, MAX_FUEL_LIMIT);
+    public static int setReportRate() {
+        final int MIN_LIMIT = 20;
+        final int MAX_LIMIT = 200;
+        return ThreadLocalRandom.current().nextInt(MIN_LIMIT, MAX_LIMIT);
     }
 
-    public static int thrusters(){
-        final int MAX_THRUSTERS = 20;
-        final int MIN_THRUSTERS = 4;
-
-        return ThreadLocalRandom.current().nextInt(MIN_THRUSTERS, MAX_THRUSTERS);
+    public int getReportRate(){
+        return reportRate;
     }
 
-    public static int instruments(){
-        final int MAX_INSTRUMENTS = 20;
-        final int MIN_INSTRUMENTS = 4;
-
-        return ThreadLocalRandom.current().nextInt(MIN_INSTRUMENTS, MAX_INSTRUMENTS);
+    public static int setSize() {
+        final int MIN_LIMIT = 20;
+        final int MAX_LIMIT = 200;
+        return ThreadLocalRandom.current().nextInt(MIN_LIMIT, MAX_LIMIT);
     }
 
-    public static int controlSystems(){
-        final int MAX_CONTROL_SYSTEMS = 4;
-        final int MIN_CONTROL_SYSTEMS = 1;
-
-        return ThreadLocalRandom.current().nextInt(MIN_CONTROL_SYSTEMS, MAX_CONTROL_SYSTEMS);
+    public int getSize(){
+        return size;
     }
-
-    public static int powerPlants(){
-        final int MAX_CONTROL_SYSTEMS = 6;
-        final int MIN_CONTROL_SYSTEMS = 2;
-
-        return ThreadLocalRandom.current().nextInt(MIN_CONTROL_SYSTEMS, MAX_CONTROL_SYSTEMS);    }
 
     // When on a mission it is necessary for all mission components to transmit reports (telemetry ) on progress  
     // instruments send data on a regular basis, but this is limited by bandwidth 
@@ -60,7 +48,7 @@ public class Component {
 
     //  There are a variable number of types of commands and reports for each mission. 
     // Reports can be telemetry (100-10k bytes, frequent) or data (100k-100MB, periodic)
-    public void transmitTelemetry(){
+    public void sendMessage(String data, String bandwidth, Integer time){
         // TODO
     }
 }

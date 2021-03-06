@@ -5,13 +5,13 @@ public class MissionGenerator {
     // Missions have a unique ID for identification purposes
     private static final int MIN_MISSION_COUNT = 10;
     private static final int MAX_MISSIONS = 200;
-	private static long startTime = System.currentTimeMillis();
+    private static long startTime = System.currentTimeMillis();
 
     public static Integer getRandomNumber(int upperBound) {
-		return new Random().nextInt(upperBound) + 1;
-	}
+      return new Random().nextInt(upperBound) + 1;
+    }
 
     public static Integer generateId(int upperMissionLimit) {
-		return getRandomNumber(MIN_MISSION_COUNT);
-	}
+      return getRandomNumber(MIN_MISSION_COUNT);
+    }
 }
