@@ -1,5 +1,4 @@
 package primaryClasses;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class Mission implements Runnable {
 
@@ -31,7 +30,7 @@ public class Mission implements Runnable {
     }
 
     public void changeStage(){
-        int journeyTime = ThreadLocalRandom.current().nextInt(1001, 10000 +1);
+        int journeyTime = GroundControl.simulateTimeAmount(1001, 10000 + 1);
         switch(stage) {
             case "launch":
 
@@ -84,11 +83,11 @@ public class Mission implements Runnable {
 
         boolean success = true;
 
-        //10% chance of failure, lower limit inclusive, upper limit exclusive.
-        int failTen = ThreadLocalRandom.current().nextInt(1, 10+1);
+        //10% chance of failure
+        int failTen = GroundControl.simulateTimeAmount(1, 10+1);
         if(failTen==1){
             System.out.println(String.format("!! %s system failure during %s! Request fix from GroundControl.", id, stage));
-            int updateTime = GroundControl.requestSoftwareFix();
+            int updateTime = GroundControl.simulateTimeAmount(31, 210+1);
             success = fixSoftwareFailure(updateTime);
             if(success){
                 System.out.println(String.format("%s software upgrade successfully applied.", id));
@@ -105,8 +104,8 @@ public class Mission implements Runnable {
         System.out.println(String.format("%s upgrading in %s days.", id, updateTime));
         try{ Thread.sleep(updateTime); } catch (InterruptedException e) {Thread.currentThread().interrupt();}
         
-        //25% chance of failure --> 1,2,3,4
-        int failFour = ThreadLocalRandom.current().nextInt(1, 4+1);
+        //25% chance of failure
+        int failFour = GroundControl.simulateTimeAmount(1, 4+1);
         if(failFour==1){
             System.out.println(String.format("!! %s upgrade has failed during %s. %1$s aborted.", id, stage));
             fixed = false;

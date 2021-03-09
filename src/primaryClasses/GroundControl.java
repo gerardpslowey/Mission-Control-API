@@ -21,9 +21,7 @@ public class GroundControl {
 		Mission[] missions = new Mission[missionCount];
 
         for(int i = 0; i < missionCount; i++) {
-            int startTime = ThreadLocalRandom.current().nextInt(31, 300 +1);
-            //long startTime = (long)(Math.random() * 300);
-			missions[i] = new Mission("M" + i, startTime);
+			missions[i] = new Mission("M" + i, simulateTimeAmount(31, 210+1));
 			missionPool.execute(missions[i]);
 		}
 
@@ -36,8 +34,13 @@ public class GroundControl {
         System.out.println("All the missions have been completed!");
     }
 
-    public static int requestSoftwareFix(){
-        int updateTime = ThreadLocalRandom.current().nextInt(31, 300 +1);
-        return updateTime;
+    public static synchronized int simulateTimeAmount(int lowerLimit, int upperLimit){
+
+        // lower limit inclusive, upper limit exclusive.
+        // 31 and 210+1 chosen to replicate 7 days in a week.
+        // 1001 and 10,000+1 chosen to replicate the months in a year.
+        // We are given the info that 1000ms is a month.
+        int time = ThreadLocalRandom.current().nextInt(lowerLimit, upperLimit +1);
+        return time;
     }
 }
