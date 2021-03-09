@@ -15,7 +15,7 @@ public class Mission implements Runnable {
     @Override
     public void run() {
         System.out.println(id + " created.");
-        System.out.println(String.format("%s is booting up in %s day(s).", id, startTime / 30));
+        System.out.printf("%s is booting up in %s day(s).%n", id, startTime / 30);
 
         try{ Thread.sleep(startTime); } catch (InterruptedException e) {Thread.currentThread().interrupt();}
 
@@ -23,9 +23,9 @@ public class Mission implements Runnable {
             changeStage();
         }
         if(stage.isEmpty()){
-            System.out.println(String.format("%s has been successful!", id));
+            System.out.printf("%s has been successful!%n", id);
         } else {
-            System.out.println(String.format("%s has failed...", id)); 
+            System.out.printf("%s has failed..%n", id); 
         }
     }
 
@@ -35,34 +35,37 @@ public class Mission implements Runnable {
             case "launch":
 
                 //if no failures
-                if(checkFailure()){
-                    System.out.println(String.format("%s had no system failures during %s.", id, stage));
+                if(failureCleared()){
+                    System.out.printf("%s had no system failures during %s.%n", id, stage);
                     stage = "transit";
                 } else {
-                    missionInProgress = false;}
+                    missionInProgress = false;
+                }
                 break;
 
             case "transit":
-                if(checkFailure()){
+                if(failureCleared()){
                     simulateJourneyTime(journeyTime);
-                    System.out.println(String.format("%s had no system failures during %s.", id, stage));
+                    System.out.printf("%s had no system failures during %s.%n", id, stage);
                     stage = "landing";
                 } else {
-                    missionInProgress = false;}
+                    missionInProgress = false;
+                }
                 break;
 
             case "landing":
-                if(checkFailure()){
-                    System.out.println(String.format("%s had no system failures during %s.", id, stage));
+                if(failureCleared()){
+                    System.out.printf("%s had no system failures during %s.%n", id, stage);
                     stage = "explore";
                 } else {
-                    missionInProgress = false;}
+                    missionInProgress = false;
+                }
                 break;
 
             case "explore":
-                if(checkFailure()){
+                if(failureCleared()){
                     simulateJourneyTime(journeyTime);
-                    System.out.println(String.format("%s had no system failures during %s.", id, stage));
+                    System.out.printf("%s had no system failures during %s.%n", id, stage);
                     stage = "";
                 }
                 missionInProgress = false;
@@ -75,22 +78,26 @@ public class Mission implements Runnable {
     }
     private void simulateJourneyTime(int journeyTime){
 
-        System.out.println(String.format("%s in transmit for %s month(s)!", id, journeyTime / 1000));
-        try{ Thread.sleep(journeyTime); } catch (InterruptedException e) {Thread.currentThread().interrupt();}
+        System.out.printf("%s in %s stage for %s month(s)!%n", id, stage, journeyTime / 1000);
+        try{ 
+            Thread.sleep(journeyTime); 
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
     
-    private boolean checkFailure(){
+    private boolean failureCleared(){
 
         boolean success = true;
 
         //10% chance of failure
         int failTen = GroundControl.simulateTimeAmount(1, 10+1);
         if(failTen==1){
-            System.out.println(String.format("!! %s system failure during %s! Request fix from GroundControl.", id, stage));
+            System.out.printf("!! %s system failure during %s! Request fix from GroundControl.%n", id, stage);
             int updateTime = GroundControl.simulateTimeAmount(31, 210+1);
             success = fixSoftwareFailure(updateTime);
             if(success){
-                System.out.println(String.format("%s software upgrade successfully applied.", id));
+                System.out.printf("%s software upgrade successfully applied.%n", id);
             }
         }
         return success;
@@ -101,13 +108,16 @@ public class Mission implements Runnable {
         boolean fixed = true;
 
         //Update takes a few days
-        System.out.println(String.format("%s upgrading in %s days.", id, updateTime));
-        try{ Thread.sleep(updateTime); } catch (InterruptedException e) {Thread.currentThread().interrupt();}
-        
+        System.out.printf("%s upgrading in %s days.%n", id, updateTime);
+        try{ 
+            Thread.sleep(updateTime); 
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
         //25% chance of failure
         int failFour = GroundControl.simulateTimeAmount(1, 4+1);
         if(failFour==1){
-            System.out.println(String.format("!! %s upgrade has failed during %s. %1$s aborted.", id, stage));
+            System.out.printf("!! %s upgrade has failed during %s. %1$s aborted.%n", id, stage);
             fixed = false;
         }
         return fixed;

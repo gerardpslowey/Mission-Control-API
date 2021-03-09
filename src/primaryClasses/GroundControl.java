@@ -36,11 +36,10 @@ public class GroundControl {
 
     public static synchronized int simulateTimeAmount(int lowerLimit, int upperLimit){
 
-        // lower limit inclusive, upper limit exclusive.
+        // Lower limit inclusive, upper limit exclusive.
+        // We are given the info that 1000ms is a month.
         // 31 and 210+1 chosen to replicate 7 days in a week.
         // 1001 and 10,000+1 chosen to replicate the months in a year.
-        // We are given the info that 1000ms is a month.
-        int time = ThreadLocalRandom.current().nextInt(lowerLimit, upperLimit +1);
-        return time;
+        return ThreadLocalRandom.current().nextInt(lowerLimit, upperLimit +1);
     }
 }
