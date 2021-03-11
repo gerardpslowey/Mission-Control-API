@@ -4,11 +4,11 @@ public class Network implements Runnable{
     
     // network speeds are all in bits
     enum NetworkType {
-        // 2MB
-        MAIN(16000000, 0.8),
-        // 2KB
-        SECONDARY(16000, 0.9),
-        // 20 bits
+        // 2MB at 80%
+        MAIN(16_000_000, 0.8),
+        // 2KB at 90%
+        SECONDARY(16_000, 0.9),
+        // 20 bits at 99%
         BACKUP(20, 0.999);
 
         private int bandwidth;

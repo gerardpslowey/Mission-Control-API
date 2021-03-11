@@ -17,16 +17,20 @@ public class Mission implements Runnable {
         System.out.println(id + " created.");
         System.out.printf("%s is booting up in %s day(s).%n", id, startTime / 30);
 
-        try{ Thread.sleep(startTime); } catch (InterruptedException e) {Thread.currentThread().interrupt();}
+        Component compo = new Component(id);
+        Thread compoThread = new Thread(compo);     //TODO: Thread is a bad idea here, what else?
+		compoThread.start();
 
-        while(missionInProgress){
-            changeStage();
-        }
-        if(stage.isEmpty()){
-            System.out.printf("%s has been successful!%n", id);
-        } else {
-            System.out.printf("%s has failed..%n", id); 
-        }
+        // try{ Thread.sleep(startTime); } catch (InterruptedException e) {Thread.currentThread().interrupt();}
+
+        // while(missionInProgress){
+        //     changeStage();
+        // }
+        // if(stage.isEmpty()){
+        //     System.out.printf("%s has been successful!%n", id);
+        // } else {
+        //     System.out.printf("%s has failed..%n", id); 
+        // }
     }
 
     public void changeStage(){
@@ -77,7 +81,6 @@ public class Mission implements Runnable {
         }
     }
     private void simulateJourneyTime(int journeyTime){
-
         System.out.printf("%s in %s stage for %s month(s)!%n", id, stage, journeyTime / 1000);
         try{ 
             Thread.sleep(journeyTime); 
@@ -87,14 +90,13 @@ public class Mission implements Runnable {
     }
     
     private boolean failureCleared(){
-
         boolean success = true;
 
         //10% chance of failure
         int failTen = GroundControl.simulateTimeAmount(1, 10+1);
         if(failTen==1){
             System.out.printf("!! %s system failure during %s! Request fix from GroundControl.%n", id, stage);
-            int updateTime = GroundControl.simulateTimeAmount(31, 210+1);
+            int updateTime = GroundControl.simulateTimeAmount(31, 210+1);         //TODO: change this to developUpdate(size, time)
             success = fixSoftwareFailure(updateTime);
             if(success){
                 System.out.printf("%s software upgrade successfully applied.%n", id);
@@ -104,7 +106,6 @@ public class Mission implements Runnable {
     }
 
     private boolean fixSoftwareFailure(int updateTime){
-
         boolean fixed = true;
 
         //Update takes a few days
