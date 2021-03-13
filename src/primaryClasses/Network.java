@@ -1,5 +1,3 @@
-package primaryClasses;
-
 public class Network implements Runnable{
     
     // network speeds are all in bits

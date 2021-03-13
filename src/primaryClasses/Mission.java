@@ -1,15 +1,27 @@
-package primaryClasses;
-
 public class Mission implements Runnable {
 
     private String id;
     private long startTime;
     private String stage = "launch";
     private boolean missionInProgress = true;
+    private Component fuel;
+    private Component thrusters;
+    private Component powerplants;
+    private Component controlSystems;
+    private Component instruments;
+
+    private int destination;
 
     public Mission(String id, long startTime){
         this.id = id;
         this.startTime = startTime;
+        this.fuel = new Component("fuel", 0, 100 + 1);          //TODO: SURELY BETTER WAY TO CREATE COMPONENTS?
+        this.thrusters = new Component("thrusters", 0, 4 + 1);
+        this.powerplants = new Component("powerplants", 0, 100 + 1);
+        this.controlSystems = new Component("controlSystems", 0, 10 + 1);
+        this.instruments = new Component("instruments", 0, 25 + 1);
+
+        this.destination = fuel.getAmount();
     }
 
     @Override
@@ -17,20 +29,18 @@ public class Mission implements Runnable {
         System.out.println(id + " created.");
         System.out.printf("%s is booting up in %s day(s).%n", id, startTime / 30);
 
-        Component compo = new Component(id);
-        Thread compoThread = new Thread(compo);     //TODO: Thread is a bad idea here, what else?
-		compoThread.start();
+        System.out.println(id + " destination = " + destination);
 
-        // try{ Thread.sleep(startTime); } catch (InterruptedException e) {Thread.currentThread().interrupt();}
+        try{ 
+            Thread.sleep(startTime); 
+        } catch (InterruptedException e) {Thread.currentThread().interrupt();}
 
-        // while(missionInProgress){
-        //     changeStage();
-        // }
-        // if(stage.isEmpty()){
-        //     System.out.printf("%s has been successful!%n", id);
-        // } else {
-        //     System.out.printf("%s has failed..%n", id); 
-        // }
+        while(missionInProgress){
+            changeStage();
+        }
+        if(stage.isEmpty()){
+            System.out.printf("%s has been successful!%n", id);
+        }
     }
 
     public void changeStage(){
@@ -98,8 +108,9 @@ public class Mission implements Runnable {
             System.out.printf("!! %s system failure during %s! Request fix from GroundControl.%n", id, stage);
             int updateTime = GroundControl.simulateTimeAmount(31, 210+1);         //TODO: change this to developUpdate(size, time)
             success = fixSoftwareFailure(updateTime);
+
             if(success){
-                System.out.printf("%s software upgrade successfully applied.%n", id);
+                System.out.printf("++ %s software upgrade successfully applied.%n", id);
             }
         }
         return success;
@@ -109,7 +120,7 @@ public class Mission implements Runnable {
         boolean fixed = true;
 
         //Update takes a few days
-        System.out.printf("%s upgrading in %s days.%n", id, updateTime);
+        System.out.printf("?? %s upgrading in %s days.%n", id, updateTime);
         try{ 
             Thread.sleep(updateTime); 
         } catch (InterruptedException e) {
@@ -118,7 +129,7 @@ public class Mission implements Runnable {
         //25% chance of failure
         int failFour = GroundControl.simulateTimeAmount(1, 4+1);
         if(failFour==1){
-            System.out.printf("!! %s upgrade has failed during %s. %1$s aborted.%n", id, stage);
+            System.out.printf("XX %s upgrade has failed during %s. %1$s aborted.%n", id, stage);
             fixed = false;
         }
         return fixed;

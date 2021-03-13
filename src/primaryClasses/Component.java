@@ -1,44 +1,43 @@
-package primaryClasses;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.LinkedBlockingDeque ;
-
 public class Component implements Runnable{
 
     private String compID;
-    private String reportRate;
+    private Integer amount;
+    private Integer reportRate;
 
-    public Component(String id){
-        compID = id;
+    public Component(String compID, int lowerLimit, int upperLimit){
+        this.compID = compID;
+        this.amount = GroundControl.simulateTimeAmount(lowerLimit, upperLimit);
+        this.reportRate = GroundControl.simulateTimeAmount(0, 20+1);
     }
-    
+
     public void run(){
+        //TODO: Set up scheduled executor of reportRate for sending telemetry/reports
+    }
 
-        LinkedBlockingDeque<Integer> components = new LinkedBlockingDeque<>();
+    public String getID(){
+        return compID;
+    }
 
-        // a fuel level of 0-100%
-        int fuel = ThreadLocalRandom.current().nextInt(0, 100 + 1);
-        components.add(fuel);
+    public Integer getAmount(){
+        return amount;
+    }
 
-        // 4 thrusters
-        int thrusters = ThreadLocalRandom.current().nextInt(0, 4 + 1);
-        components.add(thrusters);
+    public void setAmount(Integer amount){
+        this.amount = amount;
+    }
 
-        //powerplant as 0-100%
-        int powerplants  = ThreadLocalRandom.current().nextInt(0, 100 + 1);
-        components.add(powerplants );
+    public Integer getReportRate(){
+        return reportRate;
+    }
 
-        //0-10 control systems?
-        int controlSystems  = ThreadLocalRandom.current().nextInt(0, 10 + 1);
-        components.add(controlSystems );
+    public String sendTelemetry(Integer reportRate){
+        //TODO: SEND telemetry TO WHO AND WHEN?
+        return "";
+    }
 
-        //25 max instruments
-        int instruments  = ThreadLocalRandom.current().nextInt(0, 25 + 1);
-        components.add(instruments );
-
-        System.out.println("Component list = " + components);
-
-
-        
-        //TODO: Each component needs to be given a random report rate as well.
+    public String sendReport(Integer reportRate){
+        //TODO: SEND report TO WHO AND WHEN?
+        //only going to be called by Instrument.
+        return "";
     }
 }

@@ -1,21 +1,17 @@
-package primaryClasses;
-
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class GroundControl {
-    // private static final int MIN_MISSION_COUNT = 10;
-    // private static final int MAX_MISSIONS = 200;
-    // private static final int MAX_MISSIONS = 200;
+    private static final int MIN_MISSION_COUNT = 2;
+    private static final int MAX_MISSIONS = 3;          //TODO: SET THESE TO 10 and 200
 
     private static Random random = new Random();
 
     public static void main(String[] args){
 
-        //int missionCount = random.nextInt(MAX_MISSIONS - MIN_MISSION_COUNT) + MIN_MISSION_COUNT;
-        int missionCount = 3;
+        int missionCount = random.nextInt(MAX_MISSIONS - MIN_MISSION_COUNT) + MIN_MISSION_COUNT;
 
         // use a thread pool for tasks
         ExecutorService missionPool = Executors.newFixedThreadPool(missionCount);
