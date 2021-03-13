@@ -1,3 +1,6 @@
+import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
+
 public class Mission implements Runnable {
 
     private String id;
@@ -31,6 +34,9 @@ public class Mission implements Runnable {
 
         System.out.println(id + " destination = " + destination);
 
+        ExecutorService componentPool = Executors.newFixedThreadPool(1);
+        componentPool.execute(fuel);
+
         try{ 
             Thread.sleep(startTime); 
         } catch (InterruptedException e) {Thread.currentThread().interrupt();}
@@ -38,6 +44,8 @@ public class Mission implements Runnable {
         while(missionInProgress){
             changeStage();
         }
+        componentPool.shutdown();
+        
         if(stage.isEmpty()){
             System.out.printf("%s has been successful!%n", id);
         }
