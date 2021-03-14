@@ -28,9 +28,9 @@ public class SoftwareUpdater implements Runnable {
              
             Thread.sleep(buildTime * 1000);
             System.out.println("Developers finished building and testing period");
-            network.transmit("update"); 
-            network.transmit("*");
             System.out.println("Patch in Network Pipeline"); 
+            network.transmit(new SoftwareUpdate(patchSize)); 
+            network.transmit("*");
 
         } 
         catch (InterruptedException e) { 

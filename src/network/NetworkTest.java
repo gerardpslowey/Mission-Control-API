@@ -1,22 +1,31 @@
 package network;
 
 import utils.SoftwareUpdater;
+import utils.SoftwareUpdate;
+import utils.Ping;
+import java.util.Random;
 
 public class NetworkTest {
 
+	static Random random = new Random();
+
 	public static void main(String[] args) 
 	{
-		Network network = new Network();
-		System.out.println(network.getBandwidth());
+		Network network1 = new Network();
 
-		SoftwareUpdater p1 = new SoftwareUpdater(network); 
-		InstallSoftwarePatch c1 = new InstallSoftwarePatch(network); 
+		SoftwareUpdater p1 = new SoftwareUpdater(network1); 
+		InstallSoftwarePatch c1 = new InstallSoftwarePatch(network1); 
 
 		Thread pThread = new Thread(p1); 
 		Thread cThread = new Thread(c1); 
 
 		pThread.start();
 		cThread.start(); 
+
+		// Ping ping = new Ping(network1);
+		// Thread pThread = new Thread(ping);
+		// pThread.start(); 
+
 	} 
 } 
 
@@ -32,8 +41,9 @@ class InstallSoftwarePatch implements Runnable {
 
 	@Override 
     public void run() { 
-		String value = network.receive();
-
+		Object value = network.receive();
+		SoftwareUpdate update = (SoftwareUpdate) value;
+		
 		while(!value.equals("*")){
 			SoftwareUpdater.showProgress();
 

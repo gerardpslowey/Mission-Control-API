@@ -2,7 +2,7 @@ package network;
 
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue; 
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class Network {
 
@@ -10,16 +10,17 @@ public class Network {
 
     private String availability;
     private int bandwidth;
-    private int latency = 1;
+    private long latency = 0;
 
-    private final BlockingQueue<String> in;
-    // private final BlockingQueue<String> out;
+    private BlockingQueue<Object> in;
+    private final BlockingQueue<String> out;
 
     public Network() {
         this.availability = checkNetworkAvailability();
         this.bandwidth = setbandwith(availability);
-        // this.latency = setNetworkLatency(distanceTravelled);
+        this.latency = setNetworkLatency(200);
         this.in = new LinkedBlockingQueue<>(bandwidth);
+        this.out = new LinkedBlockingQueue<>(bandwidth);
     }
 
     // network speeds are all in bits
@@ -70,28 +71,45 @@ public class Network {
         return network.showBandwidth();
     }
 
-
     // subject to increasing delays as the mission travels further away from Earth
-    private int setNetworkLatency(int distanceTravelled){
+    private synchronized long setNetworkLatency(int distanceTravelled){
         // adds 1 second of latency per 1000 kilometers travelled
-        return this.latency;
+        long networkLatency = this.latency;
+        long journeyCompleted = distanceTravelled/100;
+
+        return networkLatency + journeyCompleted;
     }
 
-    public String receive() {
-        try{
+    private long simulateLatency(){
+        return this.getLatency() * 100;
+    }
+
+    public Object receive() {
+        try{            
+            // simulate latency on the network
+            Thread.sleep(simulateLatency());
+            
             return this.in.take();
         } catch (InterruptedException e) { 
             Thread.currentThread().interrupt();        
         } 
-        return "Null";
+        return "";
     } 
 
-    public void transmit(String message){
+    public void transmit(Object data){
         try{
-            this.in.put(message);
+            this.in.put(data);
         } catch (InterruptedException e) { 
             Thread.currentThread().interrupt();        
         }  
+    }
+
+    public void replyToPing(){
+        try{
+            this.out.put("Success");
+        } catch (InterruptedException e) { 
+            Thread.currentThread().interrupt();        
+        }
     }
 
     public String getAvailability(){
@@ -102,7 +120,7 @@ public class Network {
         return this.bandwidth; 
     }
 
-    public int getLatency(){
+    public long getLatency(){
         return this.latency; 
     }
 }
