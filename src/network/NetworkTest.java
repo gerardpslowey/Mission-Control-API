@@ -1,18 +1,16 @@
 package network;
 
-import utils.SoftwarePatch;
-
-import java.util.concurrent.LinkedBlockingQueue; 
-import java.util.concurrent.BlockingQueue; 
+import utils.SoftwareUpdater;
 
 public class NetworkTest {
 
 	public static void main(String[] args) 
-	{ 
-		BlockingQueue<String> bqueue = new LinkedBlockingQueue<>(); 
+	{
+		Network network = new Network();
+		System.out.println(network.getBandwidth());
 
-		ProduceSoftwareUpdate p1 = new ProduceSoftwareUpdate(bqueue); 
-		InstallSoftwarePatch c1 = new InstallSoftwarePatch(bqueue); 
+		SoftwareUpdater p1 = new SoftwareUpdater(network); 
+		InstallSoftwarePatch c1 = new InstallSoftwarePatch(network); 
 
 		Thread pThread = new Thread(p1); 
 		Thread cThread = new Thread(c1); 
@@ -25,28 +23,22 @@ public class NetworkTest {
 // Probably be located in Component.java
 class InstallSoftwarePatch implements Runnable { 
 
-	BlockingQueue<String> obj; 
-    boolean running = true;
+	Network network;
 
-	public InstallSoftwarePatch(BlockingQueue<String> obj) 
+	public InstallSoftwarePatch(Network network) 
 	{ 
-		this.obj = obj; 
+		this.network = network; 
 	} 
 
 	@Override 
     public void run() { 
-        try { 
-            String value = obj.take();
+		String value = network.receive();
 
-            while(!value.equals("*")){
-                SoftwarePatch.showProgress();
+		while(!value.equals("*")){
+			SoftwareUpdater.showProgress();
 
-                value = obj.take();
-            }
-        } 
-
-        catch (InterruptedException e) { 
-            Thread.currentThread().interrupt();        } 
+			value = network.receive();
+		}
+		System.out.println("Update successfully installed!");
 	} 
-
 }

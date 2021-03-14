@@ -2,22 +2,24 @@ package network;
 
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue; 
 
 public class Network {
 
     static Random random = new Random();
-    BlockingQueue<String> blockingQueue = new LinkedBlockingDeque<>();
 
     private String availability;
     private int bandwidth;
     private int latency = 1;
 
+    private final BlockingQueue<String> in;
+    // private final BlockingQueue<String> out;
+
     public Network() {
         this.availability = checkNetworkAvailability();
         this.bandwidth = setbandwith(availability);
         // this.latency = setNetworkLatency(distanceTravelled);
-
+        this.in = new LinkedBlockingQueue<>(bandwidth);
     }
 
     // network speeds are all in bits
@@ -73,6 +75,23 @@ public class Network {
     private int setNetworkLatency(int distanceTravelled){
         // adds 1 second of latency per 1000 kilometers travelled
         return this.latency;
+    }
+
+    public String receive() {
+        try{
+            return this.in.take();
+        } catch (InterruptedException e) { 
+            Thread.currentThread().interrupt();        
+        } 
+        return "Null";
+    } 
+
+    public void transmit(String message){
+        try{
+            this.in.put(message);
+        } catch (InterruptedException e) { 
+            Thread.currentThread().interrupt();        
+        }  
     }
 
     public String getAvailability(){
