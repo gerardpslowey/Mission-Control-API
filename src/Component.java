@@ -6,52 +6,53 @@ import static java.util.concurrent.TimeUnit.*;
 public class Component implements Runnable{
 
     private String compID;
-    private Integer amount;
+    private Integer size;
     private Integer reportRate;
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
-    public Component(String compID, int lowerLimit, int upperLimit){
+    public Component(String compID, int upperLimit){
         this.compID = compID;
-        this.amount = GroundControl.simulateTimeAmount(lowerLimit, upperLimit);
+        this.size = GroundControl.simulateTimeAmount(1, upperLimit);
         this.reportRate = GroundControl.simulateTimeAmount(31, 210+1);
     }
 
     public void run(){
-        //TODO: Set up scheduled executor of reportRate for sending telemetry/reports
 
-        Runnable beeper = () -> System.out.printf("%s: sending telemetry %n", compID);
-        ScheduledFuture<?> beeperHandle = scheduler.scheduleAtFixedRate(beeper, reportRate, 10000, MILLISECONDS);
-        
-        Runnable canceller = () -> beeperHandle.cancel(false);
-        scheduler.schedule(canceller, 1, HOURS);
-
-        //scheduledfuture: reportRate is initialRate and then 10,000 is the amount it multiplied by.
+        sendProgressReport(); 
+        //scheduledfuture: reportRate is initialRate and then 1000 is the amount it multiplied by.
     }
 
     public String getID(){
         return compID;
     }
 
-    public Integer getAmount(){
-        return amount;
+    public Integer getSize(){
+        return size;
     }
 
-    public void setAmount(Integer amount){
-        this.amount = amount;
+    public void setSize(Integer size){
+        this.size = size;
     }
 
     public Integer getReportRate(){
         return reportRate;
     }
 
-    public String sendTelemetry(Integer reportRate){
-        //TODO: SEND telemetry TO WHO AND WHEN?
-        return "";
-    }
+    public synchronized void sendProgressReport(){
 
-    public String sendReport(Integer reportRate){
-        //TODO: SEND report TO WHO AND WHEN?
-        //only going to be called by Instrument.
-        return "";
+        Runnable message = () -> System.out.printf("%s telemetry message: %s left. %n", compID, size);
+
+        while(true){
+            try{
+                scheduler.scheduleAtFixedRate(message, 0, reportRate, MILLISECONDS);
+                int failure = GroundControl.simulateTimeAmount(1, 10+1);
+                if(failure <= 3){
+                    System.out.printf("!! %s component awaiting command response %n", compID);
+                    wait();
+                    GroundControl.commandResponse(compID);
+                }
+
+            } catch (InterruptedException e) {Thread.currentThread().interrupt();}
+        }
     }
 }

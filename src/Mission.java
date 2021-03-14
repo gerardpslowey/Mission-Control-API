@@ -7,24 +7,20 @@ public class Mission implements Runnable {
     private long startTime;
     private String stage = "launch";
     private boolean missionInProgress = true;
-    private Component fuel;
-    private Component thrusters;
-    private Component powerplants;
-    private Component controlSystems;
-    private Component instruments;
+    private Component[] components = new Component[5];
 
     private int destination;
 
     public Mission(String id, long startTime){
         this.id = id;
         this.startTime = startTime;
-        this.fuel = new Component("fuel", 0, 100 + 1);          //TODO: SURELY BETTER WAY TO CREATE COMPONENTS?
-        this.thrusters = new Component("thrusters", 0, 4 + 1);
-        this.powerplants = new Component("powerplants", 0, 100 + 1);
-        this.controlSystems = new Component("controlSystems", 0, 10 + 1);
-        this.instruments = new Component("instruments", 0, 25 + 1);
+        components[0] = new Component("fuel", 100 + 1);          //TODO: SURELY BETTER WAY TO CREATE COMPONENTS?
+        components[1] = new Component("thrusters", 4 + 1);
+        components[2] = new Component("powerplants", 100 + 1);
+        components[3] = new Component("controlSystems", 10 + 1);
+        components[4] = new Component("instruments", 25 + 1);
 
-        this.destination = fuel.getAmount();
+        this.destination = components[0].getSize();
     }
 
     @Override
@@ -34,8 +30,12 @@ public class Mission implements Runnable {
 
         System.out.println(id + " destination = " + destination);
 
-        ExecutorService componentPool = Executors.newFixedThreadPool(1);
-        componentPool.execute(fuel);
+        ExecutorService componentPool = Executors.newFixedThreadPool(5);
+        for(int i = 0; i < 5; i++) {
+			componentPool.execute(components[i]);
+		}
+
+        // System.out.println(components[0].getID());
 
         try{ 
             Thread.sleep(startTime); 
@@ -141,5 +141,9 @@ public class Mission implements Runnable {
             fixed = false;
         }
         return fixed;
-    }  
+    } 
+
+    public String getStage(){
+        return this.stage; 
+    }
 }
