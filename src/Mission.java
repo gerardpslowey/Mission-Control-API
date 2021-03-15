@@ -144,6 +144,7 @@ public class Mission implements Runnable {
                 System.out.printf("XX %s upgrade has failed during %s. %1$s aborted.%n", id, stage);
             }
             else{
+                SoftwareUpdater.showProgress();
                 System.out.printf("++ %s software upgrade successfully applied.%n", id);
             }
             return success;
