@@ -29,7 +29,7 @@ public class SoftwareUpdater implements Callable<Boolean> {
             System.out.println("Software Patch Requested, Beginning Build");
             System.out.println("Estimated development time: " + buildTime + " days");
             System.out.println("Estimated patch size: " + patchSize + " MB");
-             
+            
             Thread.sleep(buildTime * 33);
             System.out.println("Developers finished building and testing period");
             System.out.println("Patch in Network Pipeline"); 

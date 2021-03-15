@@ -1,8 +1,8 @@
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 import utils.SimulateTimeAmount;
+import network.Network;
 
 public class GroundControl {
     private static final int MIN_MISSION_COUNT = 2;
@@ -33,17 +33,11 @@ public class GroundControl {
         System.out.println("All the missions have been completed!");
     }
 
+    public static synchronized void commandResponse(Component component){
 
-
-    public static synchronized int[] developUpdate(int lowerLimit, int upperLimit){     //TODO: implement this
-        int time = SimulateTimeAmount.compute(lowerLimit, upperLimit);
-        int updateSize = random.nextInt(500);
-
-        return new int[] {updateSize, time};
-    }
-
-    public static synchronized boolean commandResponse(String component){
-        System.out.println("Sending command response to." + component);
-        return true;
+        Network network = component.getNetwork();
+        network.receive();
+        System.out.println("Sending command response to." + component.getID());
+        component.notifyAll();
     }
 }

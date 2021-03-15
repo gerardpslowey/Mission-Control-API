@@ -1,5 +1,4 @@
 import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Callable; 
@@ -27,15 +26,15 @@ public class Mission implements Runnable {
     public Mission(String id, long startTime){
         this.id = id;
         this.startTime = startTime;
-        components[0] = new Component("fuel", 100 + 1);          //TODO: SURELY BETTER WAY TO CREATE COMPONENTS?
-        components[1] = new Component("thrusters", 4 + 1);
-        components[2] = new Component("powerplants", 100 + 1);
-        components[3] = new Component("controlSystems", 10 + 1);
-        components[4] = new Component("instruments", 25 + 1);
-
-        this.destination = components[0].getSize(); //fuel amount.
 
         this.network = new Network();
+        components[0] = new Component("fuel", this.network, 100 + 1);
+        components[1] = new Component("thrusters", this.network, 4 + 1);
+        components[2] = new Component("powerplants", this.network, 100 + 1);
+        components[3] = new Component("controlSystems", this.network, 10 + 1);
+        components[4] = new Component("instruments", this.network, 25 + 1);
+
+        this.destination = components[0].getSize(); //fuel amount.
     }
 
     @Override
@@ -127,32 +126,31 @@ public class Mission implements Runnable {
         int failTen = ThreadLocalRandom.current().nextInt(1, 10+1);   // TODO add to utils
         if(failTen == 1){
             System.out.printf("!! %s system failure during %s! Request fix from GroundControl.%n", id, stage);
-                        
-            fixSoftwareFailure();
-
+            success = fixSoftwareFailure();
         }
         return success;
     }
 
-    private void fixSoftwareFailure(){
+    private boolean fixSoftwareFailure(){
 
         //Update takes a few days
-
         Callable<Boolean> updater = new SoftwareUpdater(network);
         Future<Boolean> fixed = componentPool.submit(updater);
+        boolean success;
 
         try {
-            if(!fixed.get().booleanValue()){
+            success = fixed.get().booleanValue();
+            if(!success){
                 System.out.printf("XX %s upgrade has failed during %s. %1$s aborted.%n", id, stage);
             }
             else{
                 System.out.printf("++ %s software upgrade successfully applied.%n", id);
             }
+            return success;
         } catch (InterruptedException | ExecutionException e) {
             Thread.currentThread().interrupt();	
         }
-
-
+    return false;
     } 
 
     public String getStage(){
