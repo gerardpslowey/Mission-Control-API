@@ -1,152 +1,161 @@
-import java.util.Random;
-import java.util.Queue;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Callable; 
+import java.util.concurrent.Future; 
+import java.util.concurrent.ExecutionException;
+
+
+import utils.SoftwareUpdater;
+import network.Network;
+import utils.SimulateTimeAmount;
 
 public class Mission implements Runnable {
-    private Random random = new Random();
 
     private String id;
     private long startTime;
+    private String stage = "launch";
+    private boolean missionInProgress = true;
+    private Component[] components = new Component[5];
 
-    private Integer destination;
-    private Component fuelLevel;
-    private Component thrusters;
-    private Component controlSystems;
-    private Component powerPlants;
+    private int destination;
+    Network network;
+    ExecutorService componentPool = Executors.newFixedThreadPool(5);
 
-    private String stage;
-    private Queue network;
 
-    // fuelLevel, thrusters, instruments, controlSystems, powerPlants
-    Network comsNetwork = new Network();
-
-    public Mission(String id, long startTime) {
+    public Mission(String id, long startTime){
         this.id = id;
         this.startTime = startTime;
-        
-        this.fuelLevel = new Component("fuel");
-        this.thrusters = new Component("thrusters");
-        this.controlSystems = new Component("controlSys");
-        this.powerPlants = new Component("powerPlant");
+        components[0] = new Component("fuel", 100 + 1);          //TODO: SURELY BETTER WAY TO CREATE COMPONENTS?
+        components[1] = new Component("thrusters", 4 + 1);
+        components[2] = new Component("powerplants", 100 + 1);
+        components[3] = new Component("controlSystems", 10 + 1);
+        components[4] = new Component("instruments", 25 + 1);
 
-        this.destination = fuelLevel.getSize(); //this.fuelLevel;              //TODO: The mission destination can be approximated as a function of the fuel load          
-        this.network = comsNetwork.calculateBandwidth();
-        this.stage = "boost";
+        this.destination = components[0].getSize(); //fuel amount.
+
+        this.network = new Network();
     }
 
     @Override
-    public void run(){
-        System.out.println("Starting " +  id);
-        //changeStage
-        //checkFailure
-        //requestSoftwarePatch
-        //sendCommandResponse
+    public void run() {
+        System.out.println(id + " created.");
+        System.out.printf("%s is booting up in %s day(s).%n", id, startTime / 30);
+
+        System.out.println(id + " destination = " + destination);
+
+        for(int i = 0; i < 5; i++) {
+			componentPool.execute(components[i]);
+		}
+
+        // System.out.println(components[0].getID());
+
+        try{ 
+            Thread.sleep(startTime); 
+        } catch (InterruptedException e) {Thread.currentThread().interrupt();}
+
+        while(missionInProgress){
+            changeStage();
+        }
+        componentPool.shutdown();
         
+        if(stage.isEmpty()){
+            System.out.printf("%s has been successful!%n", id);
+        }
     }
 
-
-    public void changeStage() {
+    public void changeStage(){
+        int journeyTime = SimulateTimeAmount.compute(1001, 10000 + 1);
         switch(stage) {
-            case "boost": case "b":
-                boostStage();
+            case "launch":
+                //if no failures
+                if(checkRunning()){
+                    System.out.printf("%s had no system failures during %s.%n", id, stage);
+                    stage = "transit";
+                } else {
+                    missionInProgress = false;
+                }
                 break;
 
-            case "transit": case "t":
-                transitStage(5);        //TODO: variable amount of months ===> 1000 < x
+            case "transit":
+                if(checkRunning()){
+                    simulateJourneyTime(journeyTime);
+                    System.out.printf("%s had no system failures during %s.%n", id, stage);
+                    stage = "landing";
+                } else {
+                    missionInProgress = false;
+                }
                 break;
 
-            case "landing": case "l":
-                landingStage();
+            case "landing":
+                if(checkRunning()){
+                    System.out.printf("%s had no system failures during %s.%n", id, stage);
+                    stage = "explore";
+                } else {
+                    missionInProgress = false;
+                }
                 break;
 
-            case "explore": case "e":
-                explorationStage(5);
-                break;    
+            case "explore":
+                if(checkRunning()){
+                    simulateJourneyTime(journeyTime);
+                    System.out.printf("%s had no system failures during %s.%n", id, stage);
+                    stage = "";
+                }
+                missionInProgress = false;
+                break;
+
             default:
-            System.out.println("Invalid Argument: " + stage);       
+                System.out.println("Invalid Argument: " + stage);
+                break;    
         }
     }
-
-    public String getid(){
-        return id;
-    }
-
-    public long getStartTime(){
-        return startTime;
-    }
-
-    // instant event.
-    private void boostStage(){
-        System.out.println(this.id + ": Starting Boost Stage");
-
-        // 10% chance of failing.
-        checkComponentFailure();
-        changeMissionStage();
-    }
-
-    // variable amounts of time to execute (in months)
-    private void transitStage(int months){
-        System.out.println(this.id + ": Starting Transit Stage");
-
-        // 10% chance of failing.
-        checkComponentFailure();
-        changeMissionStage();
-    }
-
-    // instant event.
-    private void landingStage(){
-        System.out.println(this.id + ": Starting Landing Stage");
-
-        // 10% chance of failing.
-        checkComponentFailure();
-        changeMissionStage();
-
-    }
-
-    // variable amounts of time to execute (in months)
-    private void explorationStage(Integer months){
-        System.out.println(this.id + ": Starting Exploration Stage");
-        
-        // 10% chance of failing.
-        checkComponentFailure();
-        changeMissionStage();
-    }
-
-    private boolean checkComponentFailure(){                                        //TODO GroundControl might take this function
-        boolean check = false;                                                      //TODO GC checks failure? Mission returns variable day and sofware size
-        System.out.println(id + ": Performing Component Check");
-
-        // no error occured
-        if (random.nextInt(10) == 0) {
-            System.out.println("Component check complete, no errors"); 
+    private void simulateJourneyTime(int journeyTime){
+        System.out.printf("%s in %s stage for %s month(s)!%n", id, stage, journeyTime / 1000);
+        try{ 
+            Thread.sleep(journeyTime); 
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
-        else {
-            System.out.println("Warning, component has Failed! Checking for resolution."); 
-            // try to recover with 25% chance
-            check = true;
+    }
+    
+    private boolean checkRunning(){
+        boolean success = true;
+
+        // 10% chance of failurebound
+        int failTen = ThreadLocalRandom.current().nextInt(1, 10+1);   // TODO add to utils
+        if(failTen == 1){
+            System.out.printf("!! %s system failure during %s! Request fix from GroundControl.%n", id, stage);
+                        
+            fixSoftwareFailure();
+
+        }
+        return success;
+    }
+
+    private void fixSoftwareFailure(){
+
+        //Update takes a few days
+
+        Callable<Boolean> updater = new SoftwareUpdater(network);
+        Future<Boolean> fixed = componentPool.submit(updater);
+
+        try {
+            if(!fixed.get().booleanValue()){
+                System.out.printf("XX %s upgrade has failed during %s. %1$s aborted.%n", id, stage);
+            }
+            else{
+                System.out.printf("++ %s software upgrade successfully applied.%n", id);
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            Thread.currentThread().interrupt();	
         }
 
-        return check;
-    }
 
-    private boolean checkforResolution(){
-        boolean resolved = false;
+    } 
 
-        // no error occured
-        if (random.nextInt(100) < 25) {                                                      //TODO 25% chance of success.
-
-            //
-            System.out.println("Component check complete, no errors");
-            // restart mission
-        }
-        else {
-            System.out.println("Warning, component has Failed! Checking for resolution."); 
-        }
-
-        return resolved;
-    }
-
-    // A variable burst of reports and commands are sent at the transition between mission stages
-    public void changeMissionStage(){
-        // TODO
+    public String getStage(){
+        return this.stage; 
     }
 }

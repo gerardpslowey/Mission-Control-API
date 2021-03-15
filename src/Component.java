@@ -1,54 +1,62 @@
-import java.util.concurrent.ThreadLocalRandom;
-    
-public class Component {
-    
-    // All mission components transmit reports (telemetry) on progress and instruments send data on a regular basis
-    // this is limited by bandwidth and subject to increasing delays as the mission travels further away from Earth.  
-    
-    //====================================================================================================
-    // 30% of reports require a command response and the mission is paused until that command is received.
-    // Reports can be telemetry (100-10k bytes, frequent) or data (100k-100MB, periodic)
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledFuture;
+import static java.util.concurrent.TimeUnit.*;
+import utils.SimulateTimeAmount;
 
-    // Each component should have a random report rate and size for the mission.
+public class Component implements Runnable{
 
-    // Each mission is allocated variable supplies of 
-    // fuel, thrusters, instruments, control systems and powerplants.
-
-    private String name;
-    private Integer reportRate;
+    private String compID;
     private Integer size;
+    private Integer reportRate;
+    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
-    public Component(String name){
-        this.name = name;
-        this.reportRate = setRandomInt();            //TODO: Randomly allocated
-        this.size = setRandomInt();                                  //TODO: Randomly allocated
-    }
-    
-    public static int setRandomInt() {
-        final int MIN_LIMIT = 20;
-        final int MAX_LIMIT = 200;
-        return ThreadLocalRandom.current().nextInt(MIN_LIMIT, MAX_LIMIT);
+    public Component(String compID, int upperLimit){
+        this.compID = compID;
+        this.size = SimulateTimeAmount.compute(1, upperLimit);
+        this.reportRate = SimulateTimeAmount.compute(31, 210+1);
     }
 
-    public String getName(){
-        return name;
-    }
-    
-    public int getReportRate(){
-        return reportRate;
+    public void run(){
+
+        // sendProgressReport(); 
+        //scheduledfuture: reportRate is initialRate and then 1000 is the amount it multiplied by.
     }
 
-    public int getSize(){
+    public String getID(){
+        return compID;
+    }
+
+    public Integer getSize(){
         return size;
     }
 
-    // When on a mission it is necessary for all mission components to transmit reports (telemetry ) on progress  
-    // instruments send data on a regular basis, but this is limited by bandwidth 
-    // subject to increasing delays as the mission travels further away from Earth.
+    public void setSize(Integer size){
+        this.size = size;
+    }
 
-    //  There are a variable number of types of commands and reports for each mission. 
-    // Reports can be telemetry (100-10k bytes, frequent) or data (100k-100MB, periodic)
-    public void sendMessage(String data, String bandwidth, Integer time){
-        // TODO
+    public Integer getReportRate(){
+        return reportRate;
+    }
+
+    public synchronized void sendProgressReport(){
+
+        Runnable message = () -> System.out.printf("%s telemetry message: %s left. %n", compID, size);
+
+        while(true){
+            try{
+                scheduler.scheduleAtFixedRate(message, 0, reportRate, MILLISECONDS);
+                int response = SimulateTimeAmount.compute(1, 10+1);
+                if(response <= 3){
+                    System.out.printf("!! %s component awaiting command response %n", compID);
+                    wait();
+                    boolean command = GroundControl.commandResponse(compID);
+                    if(command){
+                        notify();           //TODO: Wake up the proper thread.
+                    }
+                }
+
+            } catch (InterruptedException e) {Thread.currentThread().interrupt();}
+        }
     }
 }

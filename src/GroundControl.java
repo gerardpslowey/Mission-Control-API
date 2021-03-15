@@ -1,42 +1,49 @@
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
+import utils.SimulateTimeAmount;
 
 public class GroundControl {
-    private static final int MIN_MISSION_COUNT = 10;
-    private static final int MAX_MISSIONS = 200;
+    private static final int MIN_MISSION_COUNT = 2;
+    private static final int MAX_MISSIONS = 3;          //TODO: SET THESE TO 10 and 200
+
+    private static Random random = new Random();
 
     public static void main(String[] args){
-        // Each mission can be represented using threads
-        // Thread t = new Thread (spaceMission, spaceMission.missionName);
-        // t.start();
 
-        //Random random = new Random();
-        //int missionCount = random.nextInt(MAX_MISSIONS - MIN_MISSION_COUNT) + MIN_MISSION_COUNT;
-        int missionCount = 10;
+        int missionCount = random.nextInt(MAX_MISSIONS - MIN_MISSION_COUNT) + MIN_MISSION_COUNT;
 
+        // use a thread pool for tasks
         ExecutorService missionPool = Executors.newFixedThreadPool(missionCount);
 		Mission[] missions = new Mission[missionCount];
 
         for(int i = 0; i < missionCount; i++) {
-            long startTime = (long)(Math.random() * 300);
-			missions[i] = new Mission("Mission" + i, startTime);
+            int startTime = SimulateTimeAmount.compute(31, 210+1);
+			missions[i] = new Mission("M" + i, startTime);
 			missionPool.execute(missions[i]);
 		}
+
+        missionPool.shutdown();
+        // if busy wait
+        // while (!missionPool.isTerminated()) {
+        //     //terminated
+        // }
+
+        System.out.println("All the missions have been completed!");
     }
 
 
-    // When a stage fails then a software patch must be sent.
-    // takes a variable number of days to develop
-    // variable size in mb
-    // related to the bandwidth queue
-    public static void produceSoftwarePatch() {
-        long numDays = (long)(Math.random() * 300);
-        int softwareSize = 5;                               //TODO: random software size
+
+    public static synchronized int[] developUpdate(int lowerLimit, int upperLimit){     //TODO: implement this
+        int time = SimulateTimeAmount.compute(lowerLimit, upperLimit);
+        int updateSize = random.nextInt(500);
+
+        return new int[] {updateSize, time};
     }
 
-    // 30% of reports require a command response and the mission is paused until that command is received. 
-    public static void sendCommandResponse() {
-
-    }    
+    public static synchronized boolean commandResponse(String component){
+        System.out.println("Sending command response to." + component);
+        return true;
+    }
 }
