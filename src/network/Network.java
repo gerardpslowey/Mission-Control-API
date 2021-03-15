@@ -45,7 +45,7 @@ public class Network {
 
     // There are three types of deep space communications networks 
     private static String checkNetworkAvailability(){
-        //80% availabilty, so 20 % chance of failure
+        // 80% availabilty, so 20 % chance of failure
         if ((random.nextInt(10) + 1) > 2) {
             return("MAIN");
         }
@@ -73,7 +73,7 @@ public class Network {
 
     // subject to increasing delays as the mission travels further away from Earth
     private synchronized long setNetworkLatency(int distanceTravelled){
-        // adds 1 second of latency per 1000 kilometers travelled
+        // adds 1 second of latency per 100 kilometers travelled
         long networkLatency = this.latency;
         long journeyCompleted = distanceTravelled/100;
 
