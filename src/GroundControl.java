@@ -47,7 +47,8 @@ public class GroundControl {
         return new int[] {updateSize, time};
     }
 
-    public static synchronized void commandResponse(String component){
+    public static synchronized boolean commandResponse(String component){
         System.out.println("Sending command response to." + component);
+        return true;
     }
 }

@@ -20,7 +20,7 @@ public class Mission implements Runnable {
         components[3] = new Component("controlSystems", 10 + 1);
         components[4] = new Component("instruments", 25 + 1);
 
-        this.destination = components[0].getSize();
+        this.destination = components[0].getSize(); //fuel amount.
     }
 
     @Override

@@ -45,11 +45,14 @@ public class Component implements Runnable{
         while(true){
             try{
                 scheduler.scheduleAtFixedRate(message, 0, reportRate, MILLISECONDS);
-                int failure = GroundControl.simulateTimeAmount(1, 10+1);
-                if(failure <= 3){
+                int response = GroundControl.simulateTimeAmount(1, 10+1);
+                if(response <= 3){
                     System.out.printf("!! %s component awaiting command response %n", compID);
                     wait();
-                    GroundControl.commandResponse(compID);
+                    boolean command = GroundControl.commandResponse(compID);
+                    if(command){
+                        notify();           //TODO: Wake up the proper thread.
+                    }
                 }
 
             } catch (InterruptedException e) {Thread.currentThread().interrupt();}
