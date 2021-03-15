@@ -1,5 +1,15 @@
 import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Callable; 
+import java.util.concurrent.Future; 
+import java.util.concurrent.ExecutionException;
+
+
+import utils.SoftwareUpdater;
+import network.Network;
+import utils.SimulateTimeAmount;
 
 public class Mission implements Runnable {
 
@@ -10,6 +20,9 @@ public class Mission implements Runnable {
     private Component[] components = new Component[5];
 
     private int destination;
+    Network network;
+    ExecutorService componentPool = Executors.newFixedThreadPool(5);
+
 
     public Mission(String id, long startTime){
         this.id = id;
@@ -21,6 +34,8 @@ public class Mission implements Runnable {
         components[4] = new Component("instruments", 25 + 1);
 
         this.destination = components[0].getSize(); //fuel amount.
+
+        this.network = new Network();
     }
 
     @Override
@@ -30,7 +45,6 @@ public class Mission implements Runnable {
 
         System.out.println(id + " destination = " + destination);
 
-        ExecutorService componentPool = Executors.newFixedThreadPool(5);
         for(int i = 0; i < 5; i++) {
 			componentPool.execute(components[i]);
 		}
@@ -52,12 +66,11 @@ public class Mission implements Runnable {
     }
 
     public void changeStage(){
-        int journeyTime = GroundControl.simulateTimeAmount(1001, 10000 + 1);
+        int journeyTime = SimulateTimeAmount.compute(1001, 10000 + 1);
         switch(stage) {
             case "launch":
-
                 //if no failures
-                if(failureCleared()){
+                if(checkRunning()){
                     System.out.printf("%s had no system failures during %s.%n", id, stage);
                     stage = "transit";
                 } else {
@@ -66,7 +79,7 @@ public class Mission implements Runnable {
                 break;
 
             case "transit":
-                if(failureCleared()){
+                if(checkRunning()){
                     simulateJourneyTime(journeyTime);
                     System.out.printf("%s had no system failures during %s.%n", id, stage);
                     stage = "landing";
@@ -76,7 +89,7 @@ public class Mission implements Runnable {
                 break;
 
             case "landing":
-                if(failureCleared()){
+                if(checkRunning()){
                     System.out.printf("%s had no system failures during %s.%n", id, stage);
                     stage = "explore";
                 } else {
@@ -85,7 +98,7 @@ public class Mission implements Runnable {
                 break;
 
             case "explore":
-                if(failureCleared()){
+                if(checkRunning()){
                     simulateJourneyTime(journeyTime);
                     System.out.printf("%s had no system failures during %s.%n", id, stage);
                     stage = "";
@@ -107,40 +120,39 @@ public class Mission implements Runnable {
         }
     }
     
-    private boolean failureCleared(){
+    private boolean checkRunning(){
         boolean success = true;
 
-        //10% chance of failure
-        int failTen = GroundControl.simulateTimeAmount(1, 10+1);
-        if(failTen==1){
+        // 10% chance of failurebound
+        int failTen = ThreadLocalRandom.current().nextInt(1, 10+1);   // TODO add to utils
+        if(failTen == 1){
             System.out.printf("!! %s system failure during %s! Request fix from GroundControl.%n", id, stage);
-            int updateTime = GroundControl.simulateTimeAmount(31, 210+1);         //TODO: change this to developUpdate(size, time)
-            success = fixSoftwareFailure(updateTime);
+                        
+            fixSoftwareFailure();
 
-            if(success){
-                System.out.printf("++ %s software upgrade successfully applied.%n", id);
-            }
         }
         return success;
     }
 
-    private boolean fixSoftwareFailure(int updateTime){
-        boolean fixed = true;
+    private void fixSoftwareFailure(){
 
         //Update takes a few days
-        System.out.printf("?? %s upgrading in %s days.%n", id, updateTime);
-        try{ 
-            Thread.sleep(updateTime); 
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+
+        Callable<Boolean> updater = new SoftwareUpdater(network);
+        Future<Boolean> fixed = componentPool.submit(updater);
+
+        try {
+            if(!fixed.get().booleanValue()){
+                System.out.printf("XX %s upgrade has failed during %s. %1$s aborted.%n", id, stage);
+            }
+            else{
+                System.out.printf("++ %s software upgrade successfully applied.%n", id);
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            Thread.currentThread().interrupt();	
         }
-        //25% chance of failure
-        int failFour = GroundControl.simulateTimeAmount(1, 4+1);
-        if(failFour==1){
-            System.out.printf("XX %s upgrade has failed during %s. %1$s aborted.%n", id, stage);
-            fixed = false;
-        }
-        return fixed;
+
+
     } 
 
     public String getStage(){

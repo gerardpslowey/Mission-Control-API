@@ -2,6 +2,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import static java.util.concurrent.TimeUnit.*;
+import utils.SimulateTimeAmount;
 
 public class Component implements Runnable{
 
@@ -12,13 +13,13 @@ public class Component implements Runnable{
 
     public Component(String compID, int upperLimit){
         this.compID = compID;
-        this.size = GroundControl.simulateTimeAmount(1, upperLimit);
-        this.reportRate = GroundControl.simulateTimeAmount(31, 210+1);
+        this.size = SimulateTimeAmount.compute(1, upperLimit);
+        this.reportRate = SimulateTimeAmount.compute(31, 210+1);
     }
 
     public void run(){
 
-        sendProgressReport(); 
+        // sendProgressReport(); 
         //scheduledfuture: reportRate is initialRate and then 1000 is the amount it multiplied by.
     }
 
@@ -45,7 +46,7 @@ public class Component implements Runnable{
         while(true){
             try{
                 scheduler.scheduleAtFixedRate(message, 0, reportRate, MILLISECONDS);
-                int response = GroundControl.simulateTimeAmount(1, 10+1);
+                int response = SimulateTimeAmount.compute(1, 10+1);
                 if(response <= 3){
                     System.out.printf("!! %s component awaiting command response %n", compID);
                     wait();

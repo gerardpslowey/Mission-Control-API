@@ -1,14 +1,16 @@
 package utils;
 
 import network.Network;
+
+import java.util.concurrent.Callable;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.Random;
 
-public class SoftwareUpdater implements Runnable { 
+public class SoftwareUpdater implements Callable<Boolean> { 
 
     static Random random = new Random();         
 	Network network;
-    int[] patchDetails = developUpdate(1, 6);
+    int[] patchDetails = developUpdate(31, 210+1);
 
 	public SoftwareUpdater(Network network) 
 	{ 
@@ -16,26 +18,35 @@ public class SoftwareUpdater implements Runnable {
 	} 
 
 	@Override 
-    public void run() 
+    public Boolean call() 
 	{ 
+        boolean fixed = true;
+
         try {
             int patchSize  = patchDetails[0];
             int buildTime = patchDetails[1];
             
             System.out.println("Software Patch Requested, Beginning Build");
-            System.out.println("Estimated development time: " + buildTime + " months");
+            System.out.println("Estimated development time: " + buildTime + " days");
             System.out.println("Estimated patch size: " + patchSize + " MB");
              
-            Thread.sleep(buildTime * 1000);
+            Thread.sleep(buildTime * 33);
             System.out.println("Developers finished building and testing period");
             System.out.println("Patch in Network Pipeline"); 
             network.transmit(new SoftwareUpdate(patchSize)); 
             network.transmit("*");
 
+            // 25% chance of failure of install
+            int failFour = SimulateTimeAmount.compute(1, 4+1);
+
+            if(failFour == 1){
+                fixed = false;
+            }
         } 
         catch (InterruptedException e) { 
             Thread.currentThread().interrupt();	
         }
+        return fixed;
     }
 
     public static int getPatchSize() {
