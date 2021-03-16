@@ -4,6 +4,8 @@ import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import utils.SimulateRandomAmountOf;
+
 public class Network {
 
     static Random random = new Random();
@@ -46,11 +48,13 @@ public class Network {
     // There are three types of deep space communications networks 
     private static String checkNetworkAvailability(){
         // 80% availabilty, so 20 % chance of failure
-        if ((random.nextInt(10) + 1) > 2) {
+
+        if(SimulateRandomAmountOf.chance() > 2){
             return("MAIN");
         }
+
         // 90% availability, so 10% chance of failure
-        else if((random.nextInt(10) + 1) > 1){
+        else if(SimulateRandomAmountOf.chance() > 1){
             return("SECONDARY"); 
         }
         // 99.9% availability, so 0.01 percent chance of failure

@@ -1,27 +1,27 @@
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Executors;
 import static java.util.concurrent.TimeUnit.*;
-import utils.SimulateTimeAmount;
+import utils.SimulateRandomAmountOf;
 import network.Network;
 
 public class Component implements Runnable{
 
     private String compID;
-    private Integer size;
+    private Integer sizeAmount;
     private Integer reportRate;
     private Network network;
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
-    public Component(String compID, Network network, int upperLimit){
+    public Component(String compID, Network network){
         this.compID = compID;
         this.network = network;
-        this.size = SimulateTimeAmount.compute(1, upperLimit);
-        this.reportRate = SimulateTimeAmount.compute(31, 210+1);
+        this.sizeAmount = SimulateRandomAmountOf.size(compID);
+        this.reportRate = SimulateRandomAmountOf.days();
     }
 
     public void run(){
 
-        // sendProgressReport(); 
+        sendProgressReport(); 
         //scheduledfuture: reportRate is initialRate and then 1000 is the amount it multiplied by.
     }
 
@@ -30,11 +30,11 @@ public class Component implements Runnable{
     }
 
     public Integer getSize(){
-        return size;
+        return sizeAmount;
     }
 
-    public void setSize(Integer size){
-        this.size = size;
+    public void setSize(Integer sizeAmount){
+        this.sizeAmount = sizeAmount;
     }
 
     public Integer getReportRate(){
@@ -47,14 +47,14 @@ public class Component implements Runnable{
 
     public synchronized void sendProgressReport(){ 
 
-        //Runnable message = () -> System.out.printf("%s telemetry message: %s left. %n", compID, size);
+        //Runnable message = () -> System.out.printf("%s telemetry message: %s left. %n", compID, sizeAmount);
         Runnable message = () -> network.transmit(200);
         Runnable command = () -> network.transmit("response");
 
         while(true){
             try{
-                scheduler.scheduleAtFixedRate(message, 0, reportRate, MILLISECONDS);
-                int response = SimulateTimeAmount.compute(1, 10+1);
+                scheduler.scheduleAtFixedRate(message, 100, reportRate, MILLISECONDS);
+                int response = SimulateRandomAmountOf.chance();
                 if(response <= 3){
                     //System.out.printf("!! %s component awaiting command response %n", compID);
                     scheduler.schedule(command, 1, MILLISECONDS);

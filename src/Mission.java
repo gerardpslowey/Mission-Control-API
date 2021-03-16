@@ -1,14 +1,12 @@
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Callable; 
 import java.util.concurrent.Future; 
 import java.util.concurrent.ExecutionException;
 
-
 import utils.SoftwareUpdater;
 import network.Network;
-import utils.SimulateTimeAmount;
+import utils.SimulateRandomAmountOf;
 
 public class Mission implements Runnable {
 
@@ -19,7 +17,8 @@ public class Mission implements Runnable {
     private Component[] components = new Component[5];
 
     private int destination;
-    Network network;
+    private Network network;
+    private String[] map;
     ExecutorService componentPool = Executors.newFixedThreadPool(5);
 
 
@@ -28,11 +27,11 @@ public class Mission implements Runnable {
         this.startTime = startTime;
 
         this.network = new Network();
-        components[0] = new Component("fuel", this.network, 100 + 1);
-        components[1] = new Component("thrusters", this.network, 4 + 1);
-        components[2] = new Component("powerplants", this.network, 100 + 1);
-        components[3] = new Component("controlSystems", this.network, 10 + 1);
-        components[4] = new Component("instruments", this.network, 25 + 1);
+        map = new String[] {"fuel", "thrusters", "powerplants", "controlSystems", "instruments"};
+
+        for (int i = 0; i < map.length; i++){
+            components[i] = new Component(map[i], this.network);
+        }
 
         this.destination = components[0].getSize(); //fuel amount.
     }
@@ -57,15 +56,19 @@ public class Mission implements Runnable {
         while(missionInProgress){
             changeStage();
         }
-        componentPool.shutdown();
         
         if(stage.isEmpty()){
             System.out.printf("%s has been successful!%n", id);
         }
+        componentPool.shutdown();
+    }
+
+    public String getStage(){
+        return this.stage; 
     }
 
     public void changeStage(){
-        int journeyTime = SimulateTimeAmount.compute(1001, 10000 + 1);
+        int journeyTime = SimulateRandomAmountOf.months();
         switch(stage) {
             case "launch":
                 //if no failures
@@ -123,7 +126,7 @@ public class Mission implements Runnable {
         boolean success = true;
 
         // 10% chance of failurebound
-        int failTen = ThreadLocalRandom.current().nextInt(1, 10+1);   // TODO add to utils
+        int failTen = SimulateRandomAmountOf.chance();
         if(failTen == 1){
             System.out.printf("!! %s system failure during %s! Request fix from GroundControl.%n", id, stage);
             success = fixSoftwareFailure();
@@ -144,6 +147,7 @@ public class Mission implements Runnable {
                 System.out.printf("XX %s upgrade has failed during %s. %1$s aborted.%n", id, stage);
             }
             else{
+                SoftwareUpdater.showProgress();
                 System.out.printf("++ %s software upgrade successfully applied.%n", id);
             }
             return success;
@@ -151,9 +155,5 @@ public class Mission implements Runnable {
             Thread.currentThread().interrupt();	
         }
     return false;
-    } 
-
-    public String getStage(){
-        return this.stage; 
     }
 }

@@ -1,7 +1,7 @@
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.Random;
-import utils.SimulateTimeAmount;
+import utils.SimulateRandomAmountOf;
 import network.Network;
 
 public class GroundControl {
@@ -19,7 +19,7 @@ public class GroundControl {
 		Mission[] missions = new Mission[missionCount];
 
         for(int i = 0; i < missionCount; i++) {
-            int startTime = SimulateTimeAmount.compute(31, 210+1);
+            int startTime = SimulateRandomAmountOf.days();
 			missions[i] = new Mission("M" + i, startTime);
 			missionPool.execute(missions[i]);
 		}
