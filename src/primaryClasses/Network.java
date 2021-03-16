@@ -1,4 +1,4 @@
-package network;
+package primaryClasses;
 
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;

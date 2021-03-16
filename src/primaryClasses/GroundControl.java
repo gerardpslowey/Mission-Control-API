@@ -1,12 +1,13 @@
+package primaryClasses;
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.Random;
 import utils.SimulateRandomAmountOf;
-import network.Network;
 
 public class GroundControl {
-    private static final int MIN_MISSION_COUNT = 2;
-    private static final int MAX_MISSIONS = 3;          //TODO: SET THESE TO 10 and 200
+    private static final int MIN_MISSION_COUNT = 10;
+    private static final int MAX_MISSIONS = 20;          //TODO: SET THESE TO 10 and 200
 
     private static Random random = new Random();
 
@@ -25,16 +26,11 @@ public class GroundControl {
 		}
 
         missionPool.shutdown();
-        // if busy wait
-        // while (!missionPool.isTerminated()) {
-        //     //terminated
-        // }
 
         System.out.println("All the missions have been completed!");
     }
 
     public static synchronized void commandResponse(Component component){
-
         Network network = component.getNetwork();
         network.receive();
         System.out.println("Sending command response to." + component.getID());

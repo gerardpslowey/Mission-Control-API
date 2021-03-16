@@ -1,3 +1,5 @@
+package primaryClasses;
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Callable; 
@@ -5,7 +7,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ExecutionException;
 
 import utils.SoftwareUpdater;
-import network.Network;
 import utils.SimulateRandomAmountOf;
 
 public class Mission implements Runnable {
@@ -73,7 +74,7 @@ public class Mission implements Runnable {
             case "launch":
                 //if no failures
                 if(checkRunning()){
-                    System.out.printf("%s had no system failures during %s.%n", id, stage);
+                    printSuccessStatus(id, stage);
                     stage = "transit";
                 } else {
                     missionInProgress = false;
@@ -83,7 +84,6 @@ public class Mission implements Runnable {
             case "transit":
                 if(checkRunning()){
                     simulateJourneyTime(journeyTime);
-                    System.out.printf("%s had no system failures during %s.%n", id, stage);
                     stage = "landing";
                 } else {
                     missionInProgress = false;
@@ -92,7 +92,7 @@ public class Mission implements Runnable {
 
             case "landing":
                 if(checkRunning()){
-                    System.out.printf("%s had no system failures during %s.%n", id, stage);
+                    printSuccessStatus(id, stage);
                     stage = "explore";
                 } else {
                     missionInProgress = false;
@@ -102,7 +102,7 @@ public class Mission implements Runnable {
             case "explore":
                 if(checkRunning()){
                     simulateJourneyTime(journeyTime);
-                    System.out.printf("%s had no system failures during %s.%n", id, stage);
+                    printSuccessStatus(id, stage);
                     stage = "";
                 }
                 missionInProgress = false;
@@ -112,6 +112,11 @@ public class Mission implements Runnable {
                 System.out.println("Invalid Argument: " + stage);
                 break;    
         }
+    }
+
+    private void printSuccessStatus(String id, String stage){
+        System.out.printf("%s had no system failures during %s.%n", id, stage);
+
     }
     private void simulateJourneyTime(int journeyTime){
         System.out.printf("%s in %s stage for %s month(s)!%n", id, stage, journeyTime / 1000);

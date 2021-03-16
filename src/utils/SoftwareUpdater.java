@@ -2,7 +2,7 @@ package utils;
 import java.util.concurrent.Callable;
 import java.util.Random;
 
-import network.Network;
+import primaryClasses.Network;
 
 public class SoftwareUpdater implements Callable<Boolean> { 
 
