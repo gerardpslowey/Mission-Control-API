@@ -1,15 +1,16 @@
 package utils;
+
 import java.util.concurrent.Callable;
 import java.util.Random;
-
 import primaryClasses.Network;
+import dataTypes.SoftwareUpdate;
 
 public class SoftwareUpdater implements Callable<Boolean> { 
 
     static Random random = new Random();         
 	Network network;
 
-    int[] patchDetails = developUpdate();
+    int[] patchDetails = getPatchDetails();
 
 	public SoftwareUpdater(Network network) 
 	{ 
@@ -29,6 +30,7 @@ public class SoftwareUpdater implements Callable<Boolean> {
             System.out.println("Estimated development time: " + buildTime + " days");
             System.out.println("Estimated patch size: " + patchSize + " MB");
             
+            // 33ms = 1 day
             Thread.sleep((long) buildTime * 33);
             System.out.println("Developers finished building and testing period");
             System.out.println("Patch in Network Pipeline"); 
@@ -43,24 +45,23 @@ public class SoftwareUpdater implements Callable<Boolean> {
             }
         } 
         catch (InterruptedException e) { 
-            Thread.currentThread().interrupt();	
+            e.printStackTrace();
+            // Thread.currentThread().interrupt();	
         }
         return success;
     }
 
-    public static int getPatchSize() {
-        return (random.nextInt(500));     
-    } 
-
     // updates take a variable number of days to develop and is a variable size in MB.        
-    public static synchronized int[] developUpdate(){
+    public static synchronized int[] getPatchDetails(){
         int time = SimulateRandomAmountOf.days();
-        int updateSize = getPatchSize();
+        int updateSize = random.nextInt(500);
 
         return new int[] {updateSize, time};
     }
 
-    public static void showProgress() {
+
+    // TODO chnage this depending on bandwidth and update size
+    public static void showUpdateProgress() {
         char[] animationChars = new char[]{'|', '/', '-', '\\'};
 
         for (int i = 0; i <= 100; i+=10) {

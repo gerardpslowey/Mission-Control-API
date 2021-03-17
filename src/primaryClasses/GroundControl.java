@@ -1,9 +1,14 @@
 package primaryClasses;
 
 import java.util.concurrent.Executors;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.Random;
 import utils.SimulateRandomAmountOf;
+import dataTypes.SoftwareUpdate;
+import utils.SoftwareUpdater;
+import java.util.concurrent.TimeUnit ;
 
 public class GroundControl {
     // mission controller is a shared resource used for all missions
@@ -28,7 +33,35 @@ public class GroundControl {
 			missionPool.execute(missions[i]);
 		}
 
-        missionPool.shutdown();
+        // while(true){
+        //     for(Mission mission : missions){          
+        //         Network missionNetwork = mission.getNetwork();    
+        //         try{
+        //             Object obj = missionNetwork.receive();
+        //             System.out.println("Hey Brother " + obj);
+        //         }
+        //         catch (Exception err){
+        //             err.printStackTrace();
+        //         }
+        //     }
+
+        
+        awaitTerminationAfterShutdown(missionPool);
+    }
+    // }
+
+
+    public static void awaitTerminationAfterShutdown(ExecutorService threadPool) {
+        threadPool.shutdown();
+        try {
+            if (!threadPool.awaitTermination(60, TimeUnit.SECONDS)) {
+                threadPool.shutdownNow();
+            }
+        } catch (InterruptedException ex) {
+            threadPool.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+
         System.out.println("All the missions have completed!");
     }
 
@@ -52,7 +85,9 @@ public class GroundControl {
 
     // software updates
     // Software upgrades must be transmitted from the mission controller
-    public static void transmitSoftwareUpgrade(){
-        // TODO
+    public static void transmitSoftwareUpgrade(Component component){
+        SoftwareUpdate update = new SoftwareUpdate(2);
+        Network network = component.getNetwork();
+        network.transmit(update);
     }
 }

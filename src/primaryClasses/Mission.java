@@ -72,6 +72,10 @@ public class Mission implements Runnable {
         componentPool.shutdown();
     }
 
+    public Network getNetwork(){
+        return this.network;
+    }
+
     public boolean getMissionProgress(){
         return this.missionInProgress; 
     }
@@ -147,8 +151,9 @@ public class Mission implements Runnable {
     private void burstOfReports(){
         // There are a variable number of types of commands and reports for each mission
         int reports = SimulateRandomAmountOf.reports();                                       //TODO: BURST REPORT AFTER EACH STAGE.
-        network.transmit(reports);
-        int commands = GroundControl.receiveBurstReports(reports, this.network);              //TODO: REPORTS ARE EITHER TELEMETRY OR DATA
+        System.out.println(reports);
+        // network.transmit(reports);
+        // int commands = GroundControl.receiveBurstReports(reports, this.network);              //TODO: REPORTS ARE EITHER TELEMETRY OR DATA
 
     }
 
@@ -191,7 +196,7 @@ public class Mission implements Runnable {
                 System.out.printf("XX %s upgrade has failed during %s. %1$s aborted.%n", id, stage);
             }
             else{
-                SoftwareUpdater.showProgress();
+                SoftwareUpdater.showUpdateProgress();
                 System.out.printf("++ %s software upgrade successfully applied.%n", id);
             }
             return success;
