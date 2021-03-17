@@ -1,30 +1,26 @@
 package primaryClasses;
 
 import java.util.concurrent.Executors;
-import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.Random;
 import utils.SimulateRandomAmountOf;
 import dataTypes.SoftwareUpdate;
-import utils.SoftwareUpdater;
-import java.util.concurrent.TimeUnit ;
+
+import dataTypes.*;
 
 public class GroundControl {
     // mission controller is a shared resource used for all missions
     // at least 10 simultaneous missions.
-    private static final int MIN_MISSION_COUNT = 2;
-    private static final int MAX_MISSIONS = 3;          //TODO: SET THESE TO 10 and 200
-
-    private static Random random = new Random();
+    private static final int MIN_MISSIONS = 2;
+    private static final int MAX_MISSIONS = 5;          //TODO: SET THESE TO 10 and 200
 
     public static void main(String[] args){
 
-        int missionCount = random.nextInt(MAX_MISSIONS - MIN_MISSION_COUNT) + MIN_MISSION_COUNT;
-
+        int missionCount = SimulateRandomAmountOf.missions(MIN_MISSIONS, MAX_MISSIONS);
+        
+        System.out.println("Number of Simultaneous Missions: " + missionCount);
         // Each mission can be represented using threads
         // use a thread pool for tasks
-        ExecutorService missionPool = Executors.newFixedThreadPool(missionCount);
+        ExecutorService missionPool = Executors.newFixedThreadPool(50);
 		Mission[] missions = new Mission[missionCount];
 
         for(int i = 0; i < missionCount; i++) {
@@ -36,44 +32,35 @@ public class GroundControl {
         // Poll the networks
         // listenOnNetwork(missions);
 
-        awaitTerminationAfterShutdown(missionPool);
+        missionPool.shutdown();
+        // System.out.println("All the missions have completed!");
+
     }
 
-    public static void awaitTerminationAfterShutdown(ExecutorService threadPool) {
-        threadPool.shutdown();
-        try {
-            if (!threadPool.awaitTermination(60, TimeUnit.SECONDS)) {
-                threadPool.shutdownNow();
-            }
-        } catch (InterruptedException ex) {
-            threadPool.shutdownNow();
-            Thread.currentThread().interrupt();
-        }
-
-        System.out.println("All the missions have completed!");
-    }
-
+    // poll the networks
     public static void listenOnNetwork(Mission[] missions){
         while(true){
             for(Mission mission : missions){          
                 Network missionNetwork = mission.getNetwork();    
-                try{
+                
+                try {
                     Object obj = missionNetwork.receive();
-                    System.out.println("Hey Brother " + obj);
-                }
-                catch (Exception err){
-                    err.printStackTrace();
+                    String name = missionNetwork.getName();
+                    process(obj, name);
+                } catch (Exception e){
+                    e.printStackTrace();
                 }
             }
-		}
+        }
     }
 
-    public static int receiveBurstReports(int reports, Network network){                    //TODO: RECEIVE BURST REPORTS AND SEND RANDOM AMOUNT OF COMMANDS BACK
-
-        Object x = network.receive();
-        int commands = SimulateRandomAmountOf.size(reports);        //return an amount of commands in range of reports.
-        return commands;
-
+    private static void process(Object obj, String missionName){
+        if (obj instanceof Report) { 
+            System.out.println("Report Received from " + missionName + "\n" + "\t" + "Contents: " + obj);
+        }
+        else if (obj instanceof Message) { 
+            System.out.println("Message Received from " + missionName + "\n" + "\t" + "Contents: " + obj + "\n");
+        }
     }
 
     public static synchronized void commandResponse(Component component){

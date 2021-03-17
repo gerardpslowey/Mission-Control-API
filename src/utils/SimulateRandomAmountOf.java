@@ -15,10 +15,19 @@ public final class SimulateRandomAmountOf {
         //not called
     }
 
+    public static synchronized int missions(int lowerLimit, int upperLimit){
+        return ThreadLocalRandom.current().nextInt(lowerLimit, upperLimit + 1);
+    }
+
     public static synchronized int days(){
         // int lowerLimit = 33, int upperLimit = 210;
         return ThreadLocalRandom.current().nextInt(33, 210 +1);
     }
+
+    public static synchronized int updateSize(){
+        return ThreadLocalRandom.current().nextInt(1, 500 +1);
+    }
+
 
     public static synchronized int months(){
         // int lowerLimit = 1_001, int upperLimit = 12_000;
@@ -31,7 +40,6 @@ public final class SimulateRandomAmountOf {
     }
 
     public static synchronized int reports(){
-
         Map<String, int[]> map = new HashMap<>();                       //TODO: CHOOSE TELEMETRY OR DATA AND SEND THROUGH NETWORK
         map.put("telemetry", new int[] {100, 10_000});
         map.put("data", new int[] {100_000, 100_000_000});

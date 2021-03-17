@@ -5,6 +5,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Callable; 
 import java.util.concurrent.Future; 
 import java.util.concurrent.ExecutionException;
+import dataTypes.*;
 
 import utils.SoftwareUpdater;
 import utils.SimulateRandomAmountOf;
@@ -20,11 +21,11 @@ public class Mission implements Runnable {
 
     private int destination;
 
-    //  communication networks for a mission are a shared resource used by all mission components
+    // communication networks for a mission are a shared resource used by all mission components
     // each mission has its own network
     private Network network;
     private String[] map;
-    ExecutorService componentPool = Executors.newFixedThreadPool(5);
+    ExecutorService componentPool = Executors.newFixedThreadPool(10);
 
 
     // Depending on the mission target, each mission must be allocated variable supplies of 
@@ -34,7 +35,7 @@ public class Mission implements Runnable {
         // missions are generated with a random start time
         this.startTime = startTime;
         // each mission has its own network
-        this.network = new Network();
+        this.network = new Network("Network " + id);
         // construct the mission vehicles from components,
         map = new String[] {"fuel", "thrusters", "powerplants", "controlSystems", "instruments"};
 
@@ -48,10 +49,7 @@ public class Mission implements Runnable {
 
     @Override
     public void run() {
-        System.out.println(id + " created.");
-        System.out.printf("%s is booting up in %s day(s).%n", id, startTime / 30);
-
-        System.out.println(id + " destination = " + destination);
+        System.out.println(id + " created, booting up in " + startTime / 30 + " day(s), destination = " + destination);
 
         for(int i = 0; i < 5; i++) {
 			componentPool.execute(components[i]);
@@ -60,16 +58,21 @@ public class Mission implements Runnable {
         try{ 
             // When waiting a mission sleeps
             Thread.sleep(startTime); 
-        } catch (InterruptedException e) {Thread.currentThread().interrupt();}
+        } catch (InterruptedException e) {
+            e.printStackTrace();	
+        }
 
         while(missionInProgress){
             changeStage();
         }
         
         if(stage.isEmpty()){
-            System.out.printf("%s has been successful!%n", id);
+            // Poison pill to end network connection
+            // this.network.transmit("Complete");
+            System.out.printf("%s has completed successfully!%n", id);
         }
-        componentPool.shutdown();
+
+        componentPool.shutdown();        
     }
 
     public Network getNetwork(){
@@ -146,30 +149,6 @@ public class Mission implements Runnable {
         }
     }
 
-    // send reports
-    // A variable burst of reports and commands are sent at the transition between mission stages.
-    private void burstOfReports(){
-        // There are a variable number of types of commands and reports for each mission
-        int reports = SimulateRandomAmountOf.reports();                                       //TODO: BURST REPORT AFTER EACH STAGE.
-        System.out.println(reports);
-        // network.transmit(reports);
-        // int commands = GroundControl.receiveBurstReports(reports, this.network);              //TODO: REPORTS ARE EITHER TELEMETRY OR DATA
-
-    }
-
-    private void printSuccessStatus(String id, String stage){
-        System.out.printf("%s had no system failures during %s.%n", id, stage);
-
-    }
-    private void simulateJourneyTime(int journeyTime){
-        System.out.printf("%s in %s stage for %s month(s)!%n", id, stage, journeyTime / 1000);
-        try{ 
-            Thread.sleep(journeyTime); 
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
-    
     // Check for failures
     // Each stage has at least a 10% chance of failing.
     private boolean checkRunning(){
@@ -177,11 +156,35 @@ public class Mission implements Runnable {
 
         int failTen = SimulateRandomAmountOf.chance();
         if(failTen == 1){
-            System.out.printf("!! %s system failure during %s! Request fix from GroundControl.%n", id, stage);
+            System.out.printf("!! %s System failure during %s! Requesting fix from Ground Control.%n", id, stage);
             success = fixSoftwareFailure();
         }
         return success;
     }
+
+    // send reports
+    // A variable burst of reports and commands are sent at the transition between mission stages.
+    private void burstOfReports(){
+        // There are a variable number of types of commands and reports for each mission
+        int reports = SimulateRandomAmountOf.reports();                                       //TODO: BURST REPORT AFTER EACH STAGE.
+        System.out.println("New Report" + reports);
+        // network.transmit(new Message("hello", 42));
+        // int commands = GroundControl.receiveBurstReports(reports, this.network);              //TODO: REPORTS ARE EITHER TELEMETRY OR DATA
+    }
+
+    private void simulateJourneyTime(int journeyTime){
+        System.out.printf("%s in %s stage for %s month(s)!%n", id, stage, journeyTime / 1000);
+        try{ 
+            Thread.sleep(journeyTime); 
+        } catch (InterruptedException e) {
+            e.printStackTrace();	
+        }
+    }
+
+    private void printSuccessStatus(String id, String stage){
+        System.out.printf("%s had no system failures during %s.%n", id, stage);
+    }
+    
 
     // 25% of failures can be recovered from by sending a software upgrade
     private boolean fixSoftwareFailure(){
@@ -196,13 +199,33 @@ public class Mission implements Runnable {
                 System.out.printf("XX %s upgrade has failed during %s. %1$s aborted.%n", id, stage);
             }
             else{
-                SoftwareUpdater.showUpdateProgress();
+                showUpdateProgress();
                 System.out.printf("++ %s software upgrade successfully applied.%n", id);
             }
             return success;
         } catch (InterruptedException | ExecutionException e) {
-            Thread.currentThread().interrupt();	
+            e.printStackTrace();	
         }
     return false;
+    }
+
+    // TODO change this depending on bandwidth and update size
+    public static void showUpdateProgress() {
+        char[] animationChars = new char[]{'|', '/', '-', '\\'};
+
+        for (int i = 0; i <= 100; i+=10) {
+            System.out.print("Installing: " + i + "% " + animationChars[i % 4] + "\r");
+
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();	
+            }
+        }
+    }
+
+    @Override
+    public String toString(){
+        return id;
     }
 }

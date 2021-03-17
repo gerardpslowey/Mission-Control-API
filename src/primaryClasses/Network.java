@@ -9,7 +9,7 @@ import utils.SimulateRandomAmountOf;
 public class Network {
 
     static Random random = new Random();
-
+    private String name;
     private String availability;
     private int bandwidth;
     private long latency = 0;
@@ -18,7 +18,8 @@ public class Network {
     private BlockingQueue<Object> inputData;
     private final BlockingQueue<String> outputData;
 
-    public Network() {
+    public Network(String name) {
+        this.name = name;
         this.availability = checkNetworkAvailability();
         // the network has limited bandwidth
         this.bandwidth = setbandwith(availability);
@@ -111,6 +112,10 @@ public class Network {
         } catch (InterruptedException e) { 
             Thread.currentThread().interrupt();        
         }
+    }
+
+    public String getName(){
+        return this.name;
     }
 
     public String getAvailability(){
