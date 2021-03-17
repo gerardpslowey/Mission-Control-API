@@ -6,8 +6,8 @@ import java.util.Random;
 import utils.SimulateRandomAmountOf;
 
 public class GroundControl {
-    private static final int MIN_MISSION_COUNT = 10;
-    private static final int MAX_MISSIONS = 20;          //TODO: SET THESE TO 10 and 200
+    private static final int MIN_MISSION_COUNT = 2;
+    private static final int MAX_MISSIONS = 3;          //TODO: SET THESE TO 10 and 200
 
     private static Random random = new Random();
 
@@ -30,10 +30,21 @@ public class GroundControl {
         System.out.println("All the missions have been completed!");
     }
 
+    public static int receiveBurstReports(int reports, Network network){                    //TODO: RECEIVE BURST REPORTS AND SEND RANDOM AMOUNT OF COMMANDS BACK
+
+        Object x = network.receive();
+        int commands = SimulateRandomAmountOf.size(reports);        //return an amount of commands in range of reports.
+        return commands;
+
+    }
+
     public static synchronized void commandResponse(Component component){
         Network network = component.getNetwork();
-        network.receive();
-        System.out.println("Sending command response to." + component.getID());
-        component.notifyAll();
+        Object x = network.receive();
+
+        if(x instanceof String){
+            System.out.println("\uD83D\uDE00 <- command response to <- " + component.getID());
+            component.notifyAll();
+        }
     }
 }

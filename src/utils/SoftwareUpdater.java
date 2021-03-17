@@ -18,7 +18,7 @@ public class SoftwareUpdater implements Callable<Boolean> {
 	@Override 
     public Boolean call() 
 	{ 
-        boolean fixed = true;
+        boolean success = true;
 
         try {
             int patchSize  = patchDetails[0];
@@ -38,13 +38,13 @@ public class SoftwareUpdater implements Callable<Boolean> {
             int failFour = SimulateRandomAmountOf.chance();
 
             if(failFour <= 4){
-                fixed = false;
+                success = false;
             }
         } 
         catch (InterruptedException e) { 
             Thread.currentThread().interrupt();	
         }
-        return fixed;
+        return success;
     }
 
     public static int getPatchSize() {

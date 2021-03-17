@@ -31,7 +31,7 @@ public class Mission implements Runnable {
         map = new String[] {"fuel", "thrusters", "powerplants", "controlSystems", "instruments"};
 
         for (int i = 0; i < map.length; i++){
-            components[i] = new Component(map[i], this.network);
+            components[i] = new Component(map[i], this.network, this);
         }
 
         this.destination = components[0].getSize(); //fuel amount.
@@ -48,8 +48,6 @@ public class Mission implements Runnable {
 			componentPool.execute(components[i]);
 		}
 
-        // System.out.println(components[0].getID());
-
         try{ 
             Thread.sleep(startTime); 
         } catch (InterruptedException e) {Thread.currentThread().interrupt();}
@@ -64,8 +62,8 @@ public class Mission implements Runnable {
         componentPool.shutdown();
     }
 
-    public String getStage(){
-        return this.stage; 
+    public boolean getMissionProgress(){
+        return this.missionInProgress; 
     }
 
     public void changeStage(){
@@ -75,6 +73,7 @@ public class Mission implements Runnable {
                 //if no failures
                 if(checkRunning()){
                     printSuccessStatus(id, stage);
+                    burstOfReports();
                     stage = "transit";
                 } else {
                     missionInProgress = false;
@@ -84,6 +83,8 @@ public class Mission implements Runnable {
             case "transit":
                 if(checkRunning()){
                     simulateJourneyTime(journeyTime);
+                    printSuccessStatus(id, stage);
+                    burstOfReports();
                     stage = "landing";
                 } else {
                     missionInProgress = false;
@@ -93,6 +94,7 @@ public class Mission implements Runnable {
             case "landing":
                 if(checkRunning()){
                     printSuccessStatus(id, stage);
+                    burstOfReports();
                     stage = "explore";
                 } else {
                     missionInProgress = false;
@@ -103,6 +105,7 @@ public class Mission implements Runnable {
                 if(checkRunning()){
                     simulateJourneyTime(journeyTime);
                     printSuccessStatus(id, stage);
+                    burstOfReports();
                     stage = "";
                 }
                 missionInProgress = false;
@@ -112,6 +115,13 @@ public class Mission implements Runnable {
                 System.out.println("Invalid Argument: " + stage);
                 break;    
         }
+    }
+
+    private void burstOfReports(){
+        int reports = SimulateRandomAmountOf.reports();                         //TODO: BURST REPORT AFTER EACH STAGE.
+        network.transmit(reports);
+        int commands = GroundControl.receiveBurstReports(reports, this.network);              //TODO: REPORTS ARE EITHER TELEMETRY OR DATA
+
     }
 
     private void printSuccessStatus(String id, String stage){

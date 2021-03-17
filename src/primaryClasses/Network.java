@@ -14,15 +14,15 @@ public class Network {
     private int bandwidth;
     private long latency = 0;
 
-    private BlockingQueue<Object> in;
-    private final BlockingQueue<String> out;
+    private BlockingQueue<Object> inputData;
+    private final BlockingQueue<String> outputData;
 
     public Network() {
         this.availability = checkNetworkAvailability();
         this.bandwidth = setbandwith(availability);
         this.latency = setNetworkLatency(200);
-        this.in = new LinkedBlockingQueue<>(bandwidth);
-        this.out = new LinkedBlockingQueue<>(bandwidth);
+        this.inputData = new LinkedBlockingQueue<>(bandwidth);
+        this.outputData = new LinkedBlockingQueue<>(bandwidth);
     }
 
     // network speeds are all in bits
@@ -93,7 +93,7 @@ public class Network {
             // simulate latency on the network
             Thread.sleep(simulateLatency());
             
-            return this.in.take();
+            return this.inputData.take();
         } catch (InterruptedException e) { 
             Thread.currentThread().interrupt();        
         } 
@@ -102,7 +102,7 @@ public class Network {
 
     public void transmit(Object data){
         try{
-            this.in.put(data);
+            this.inputData.put(data);
         } catch (InterruptedException e) { 
             Thread.currentThread().interrupt();        
         }  
@@ -110,7 +110,7 @@ public class Network {
 
     public void replyToPing(){
         try{
-            this.out.put("Success");
+            this.outputData.put("Success");
         } catch (InterruptedException e) { 
             Thread.currentThread().interrupt();        
         }

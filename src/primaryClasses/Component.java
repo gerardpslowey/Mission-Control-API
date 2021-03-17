@@ -1,7 +1,6 @@
 package primaryClasses;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.Executors;
 import utils.SimulateRandomAmountOf;
@@ -12,17 +11,18 @@ public class Component implements Runnable{
     private Integer sizeAmount;
     private Integer reportRate;
     private Network network;
+    private Mission mission;
 
-    public Component(String compID, Network network){
+    public Component(String compID, Network network, Mission mission){
         this.compID = compID;
         this.network = network;
+        this.mission = mission;
         this.sizeAmount = SimulateRandomAmountOf.size(compID);
         this.reportRate = SimulateRandomAmountOf.days();
     }
 
     public void run(){
-        sendProgressReport(); 
-        //scheduledfuture: reportRate is initialRate and then 1000 is the amount it multiplied by.
+        //sendProgressReport(); 
     }
 
     public String getID(){
@@ -41,40 +41,45 @@ public class Component implements Runnable{
         return reportRate;
     }
 
+    public void setReportRate(Integer reportRate){
+        this.reportRate = reportRate;
+    }
+
     public Network getNetwork(){
         return this.network;
     }
 
     public synchronized void sendProgressReport(){ 
 
-        Runnable message = () -> System.out.printf("%s telemetry message: %s left. %n", compID, sizeAmount);
-        // Runnable message = () -> network.transmit(200);
-        Runnable command = () -> network.transmit("response");
+        Runnable message = () -> {
+            System.out.printf("%s -> telemetry message -> %s %n", compID, sizeAmount);
+            network.transmit(200);
+        };
 
+        Runnable command = () -> {
+            System.out.printf("!! %s component awaiting command response %n", compID);
+            network.transmit("200");
+        };
+        
         final ScheduledThreadPoolExecutor scheduler = (ScheduledThreadPoolExecutor)Executors.newScheduledThreadPool(1);
-        final ScheduledFuture<?> progressUpdater = scheduler.scheduleAtFixedRate(message, 2, reportRate, TimeUnit.SECONDS);
 
-        scheduler.schedule(new Runnable() {
+        while(mission.getMissionProgress()){
+            try{
+                wait();
+                scheduler.schedule(message, reportRate, TimeUnit.MILLISECONDS);
+                int getResponse = SimulateRandomAmountOf.chance();
+                if(getResponse <= 3){
+                    scheduler.schedule(command, reportRate, TimeUnit.MILLISECONDS);
+                } else {
+                    notifyAll();
+                }
+            GroundControl.commandResponse(this);
+            setReportRate(reportRate + 1000);
 
-            @Override
-            public void run(){
-                progressUpdater.cancel(true);
-                scheduler.shutdown();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
-        }, 10, TimeUnit.SECONDS);
-
-
-        // while(true){
-        //     try{
-        //         scheduler.scheduleAtFixedRate(message, 100, reportRate, MILLISECONDS);
-        //         int response = SimulateRandomAmountOf.chance();
-        //         if(response <= 3){
-        //             //System.out.printf("!! %s component awaiting command response %n", compID);
-        //             scheduler.schedule(command, 1, MILLISECONDS);
-        //             wait();
-        //             GroundControl.commandResponse(this);
-        //         }
-        //     } catch (InterruptedException e) {Thread.currentThread().interrupt();}
-        // }
+        }
+        scheduler.shutdown();
     }
 }
