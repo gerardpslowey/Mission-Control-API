@@ -31,25 +31,13 @@ public class GroundControl {
             int startTime = SimulateRandomAmountOf.days();
 			missions[i] = new Mission("M" + i, startTime);
 			missionPool.execute(missions[i]);
-		}
+        }
 
-        // while(true){
-        //     for(Mission mission : missions){          
-        //         Network missionNetwork = mission.getNetwork();    
-        //         try{
-        //             Object obj = missionNetwork.receive();
-        //             System.out.println("Hey Brother " + obj);
-        //         }
-        //         catch (Exception err){
-        //             err.printStackTrace();
-        //         }
-        //     }
+        // Poll the networks
+        // listenOnNetwork(missions);
 
-        
         awaitTerminationAfterShutdown(missionPool);
     }
-    // }
-
 
     public static void awaitTerminationAfterShutdown(ExecutorService threadPool) {
         threadPool.shutdown();
@@ -63,6 +51,21 @@ public class GroundControl {
         }
 
         System.out.println("All the missions have completed!");
+    }
+
+    public static void listenOnNetwork(Mission[] missions){
+        while(true){
+            for(Mission mission : missions){          
+                Network missionNetwork = mission.getNetwork();    
+                try{
+                    Object obj = missionNetwork.receive();
+                    System.out.println("Hey Brother " + obj);
+                }
+                catch (Exception err){
+                    err.printStackTrace();
+                }
+            }
+		}
     }
 
     public static int receiveBurstReports(int reports, Network network){                    //TODO: RECEIVE BURST REPORTS AND SEND RANDOM AMOUNT OF COMMANDS BACK
