@@ -1,6 +1,6 @@
 package utils;
 
-import network.Network;
+import primaryClasses.Network;
 
 public class Ping implements Runnable{
     

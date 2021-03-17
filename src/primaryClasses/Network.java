@@ -1,8 +1,10 @@
-package network;
+package primaryClasses;
 
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import utils.SimulateRandomAmountOf;
 
 public class Network {
 
@@ -12,17 +14,21 @@ public class Network {
     private int bandwidth;
     private long latency = 0;
 
-    private BlockingQueue<Object> in;
-    private final BlockingQueue<String> out;
+    // represent the communications networks (queues) 
+    private BlockingQueue<Object> inputData;
+    private final BlockingQueue<String> outputData;
 
     public Network() {
         this.availability = checkNetworkAvailability();
+        // the network has limited bandwidth
         this.bandwidth = setbandwith(availability);
+        // communications are subject to increasing delays as the mission travels further away from Earth
         this.latency = setNetworkLatency(200);
-        this.in = new LinkedBlockingQueue<>(bandwidth);
-        this.out = new LinkedBlockingQueue<>(bandwidth);
+        this.inputData = new LinkedBlockingQueue<>(bandwidth);
+        this.outputData = new LinkedBlockingQueue<>(bandwidth);
     }
 
+    // three types of deep space communications
     // network speeds are all in bits
     public enum NetworkType {
         // 2MB at 80%
@@ -46,25 +52,20 @@ public class Network {
     // There are three types of deep space communications networks 
     private static String checkNetworkAvailability(){
         // 80% availabilty, so 20 % chance of failure
-        if ((random.nextInt(10) + 1) > 2) {
+        if(SimulateRandomAmountOf.chance() > 2){
             return("MAIN");
         }
+
         // 90% availability, so 10% chance of failure
-        else if((random.nextInt(10) + 1) > 1){
+        else if(SimulateRandomAmountOf.chance() > 1){
             return("SECONDARY"); 
         }
+
         // 99.9% availability, so 0.01 percent chance of failure
         else{
             return("BACKUP");
         }
     }
-
-    private static int simulateMissionDistance() {
-        // Hard code mission destination distance for the moment
-        final int distance = 100;
-        // TODO
-        return distance;
-    } 
 
     private static int setbandwith(String availability) {
         NetworkType network = NetworkType.valueOf(availability);
@@ -89,7 +90,7 @@ public class Network {
             // simulate latency on the network
             Thread.sleep(simulateLatency());
             
-            return this.in.take();
+            return this.inputData.take();
         } catch (InterruptedException e) { 
             Thread.currentThread().interrupt();        
         } 
@@ -98,7 +99,7 @@ public class Network {
 
     public void transmit(Object data){
         try{
-            this.in.put(data);
+            this.inputData.put(data);
         } catch (InterruptedException e) { 
             Thread.currentThread().interrupt();        
         }  
@@ -106,7 +107,7 @@ public class Network {
 
     public void replyToPing(){
         try{
-            this.out.put("Success");
+            this.outputData.put("Success");
         } catch (InterruptedException e) { 
             Thread.currentThread().interrupt();        
         }
