@@ -4,6 +4,8 @@ import java.util.Map;
 import java.util.HashMap;
 
 public final class SimulateRandomAmountOf {
+    // Time is simulated by allowing a fixed ratio of wall clock time to mission time eg 1 sec : 1 month
+
     // Lower limit inclusive, upper limit exclusive.
     // We are given the info that 1s is a month.
     // 31 and 210+1 = 7 days in a week.

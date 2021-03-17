@@ -14,17 +14,21 @@ public class Network {
     private int bandwidth;
     private long latency = 0;
 
+    // represent the communications networks (queues) 
     private BlockingQueue<Object> inputData;
     private final BlockingQueue<String> outputData;
 
     public Network() {
         this.availability = checkNetworkAvailability();
+        // the network has limited bandwidth
         this.bandwidth = setbandwith(availability);
+        // communications are subject to increasing delays as the mission travels further away from Earth
         this.latency = setNetworkLatency(200);
         this.inputData = new LinkedBlockingQueue<>(bandwidth);
         this.outputData = new LinkedBlockingQueue<>(bandwidth);
     }
 
+    // three types of deep space communications
     // network speeds are all in bits
     public enum NetworkType {
         // 2MB at 80%
@@ -48,7 +52,6 @@ public class Network {
     // There are three types of deep space communications networks 
     private static String checkNetworkAvailability(){
         // 80% availabilty, so 20 % chance of failure
-
         if(SimulateRandomAmountOf.chance() > 2){
             return("MAIN");
         }
@@ -57,18 +60,12 @@ public class Network {
         else if(SimulateRandomAmountOf.chance() > 1){
             return("SECONDARY"); 
         }
+
         // 99.9% availability, so 0.01 percent chance of failure
         else{
             return("BACKUP");
         }
     }
-
-    private static int simulateMissionDistance() {
-        // Hard code mission destination distance for the moment
-        final int distance = 100;
-        // TODO
-        return distance;
-    } 
 
     private static int setbandwith(String availability) {
         NetworkType network = NetworkType.valueOf(availability);

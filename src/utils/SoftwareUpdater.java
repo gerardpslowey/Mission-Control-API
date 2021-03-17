@@ -8,6 +8,7 @@ public class SoftwareUpdater implements Callable<Boolean> {
 
     static Random random = new Random();         
 	Network network;
+
     int[] patchDetails = developUpdate();
 
 	public SoftwareUpdater(Network network) 
@@ -51,6 +52,7 @@ public class SoftwareUpdater implements Callable<Boolean> {
         return (random.nextInt(500));     
     } 
 
+    // updates take a variable number of days to develop and is a variable size in MB.        
     public static synchronized int[] developUpdate(){
         int time = SimulateRandomAmountOf.days();
         int updateSize = getPatchSize();

@@ -17,8 +17,9 @@ public class Component implements Runnable{
         this.compID = compID;
         this.network = network;
         this.mission = mission;
-        this.sizeAmount = SimulateRandomAmountOf.size(compID);
+        // Each component has a random report rate and size 
         this.reportRate = SimulateRandomAmountOf.days();
+        this.sizeAmount = SimulateRandomAmountOf.size(compID);
     }
 
     public void run(){
@@ -49,6 +50,7 @@ public class Component implements Runnable{
         return this.network;
     }
 
+    // on a mission it is necessary for all mission components to transmit reports (telemetry ) on progress
     public synchronized void sendProgressReport(){ 
 
         Runnable message = () -> {
@@ -68,11 +70,14 @@ public class Component implements Runnable{
                 wait();
                 scheduler.schedule(message, reportRate, TimeUnit.MILLISECONDS);
                 int getResponse = SimulateRandomAmountOf.chance();
+
+                // 30% of reports require a command response
                 if(getResponse <= 3){
                     scheduler.schedule(command, reportRate, TimeUnit.MILLISECONDS);
                 } else {
                     notifyAll();
                 }
+            // the mission is paused until that command is received
             GroundControl.commandResponse(this);
             setReportRate(reportRate + 1000);
 
@@ -81,5 +86,10 @@ public class Component implements Runnable{
             }
         }
         scheduler.shutdown();
+    }
+
+    // instruments send data on a regular basis
+    public synchronized void sendData(){ 
+        // TODO
     }
 }

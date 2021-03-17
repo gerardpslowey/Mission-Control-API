@@ -6,6 +6,8 @@ import java.util.Random;
 import utils.SimulateRandomAmountOf;
 
 public class GroundControl {
+    // mission controller is a shared resource used for all missions
+    // at least 10 simultaneous missions.
     private static final int MIN_MISSION_COUNT = 2;
     private static final int MAX_MISSIONS = 3;          //TODO: SET THESE TO 10 and 200
 
@@ -15,6 +17,7 @@ public class GroundControl {
 
         int missionCount = random.nextInt(MAX_MISSIONS - MIN_MISSION_COUNT) + MIN_MISSION_COUNT;
 
+        // Each mission can be represented using threads
         // use a thread pool for tasks
         ExecutorService missionPool = Executors.newFixedThreadPool(missionCount);
 		Mission[] missions = new Mission[missionCount];
@@ -26,8 +29,7 @@ public class GroundControl {
 		}
 
         missionPool.shutdown();
-
-        System.out.println("All the missions have been completed!");
+        System.out.println("All the missions have completed!");
     }
 
     public static int receiveBurstReports(int reports, Network network){                    //TODO: RECEIVE BURST REPORTS AND SEND RANDOM AMOUNT OF COMMANDS BACK
@@ -46,5 +48,11 @@ public class GroundControl {
             System.out.println("\uD83D\uDE00 <- command response to <- " + component.getID());
             component.notifyAll();
         }
+    }
+
+    // software updates
+    // Software upgrades must be transmitted from the mission controller
+    public static void transmitSoftwareUpgrade(){
+        // TODO
     }
 }
