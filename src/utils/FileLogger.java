@@ -39,7 +39,7 @@ public class FileLogger implements Runnable {
                 }
             }
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Thread.currentThread().interrupt();
         }
     } 
     // putting in the queue

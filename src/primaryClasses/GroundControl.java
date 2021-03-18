@@ -54,12 +54,13 @@ public class GroundControl {
         }
 
         missionPool.shutdown();
+        
         try{
             latch.await();
             logPool.shutdown();
             logger.put("*");
         } catch (InterruptedException e){
-            e.printStackTrace();
+            Thread.currentThread().interrupt();
         }
         // System.out.println("All the missions have completed!");
     }

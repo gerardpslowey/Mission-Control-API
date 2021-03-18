@@ -93,7 +93,7 @@ public class Network {
             
             return this.inputData.take();
         } catch (InterruptedException e) { 
-            Thread.currentThread().interrupt();        
+            Thread.currentThread().interrupt(); 
         } 
         return "";
     } 

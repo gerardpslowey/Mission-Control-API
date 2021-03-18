@@ -22,7 +22,7 @@ public class Mission implements Runnable {
     // each mission has its own network
     private Network network;
     private String[] map;
-    ExecutorService componentPool = Executors.newFixedThreadPool(10);
+    ExecutorService componentPool = Executors.newFixedThreadPool(20);
 
 
     // Depending on the mission target, each mission must be allocated variable supplies of 
@@ -57,7 +57,7 @@ public class Mission implements Runnable {
             // When waiting a mission sleeps
             Thread.sleep(startTime); 
         } catch (InterruptedException e) {
-            e.printStackTrace();	
+            Thread.currentThread().interrupt();
         }
 
         while(missionInProgress){
@@ -165,7 +165,6 @@ public class Mission implements Runnable {
             SoftwareUpdate sw = new SoftwareUpdate(420);
             success = installUpdate(sw);
         }
-
         return success;
     }
 
@@ -183,7 +182,7 @@ public class Mission implements Runnable {
         try{ 
             Thread.sleep(journeyTime); 
         } catch (InterruptedException e) {
-            e.printStackTrace();	
+            Thread.currentThread().interrupt();
         }
     }
 
@@ -218,7 +217,7 @@ public class Mission implements Runnable {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
-                e.printStackTrace();	
+                Thread.currentThread().interrupt();
             }
         }
     }
