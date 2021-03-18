@@ -38,19 +38,21 @@ public class FileLogger implements Runnable {
 
                     List<String> log = Arrays.asList(queue.poll().split(","));
                     String mission = log.get(0);
-                    String message = log.get(1);
+                    String threadinfo = log.get(1);
+                    String note = log.get(2);
 
                     printWriter.print("Mission Component " + mission.substring(mission.length() - 2)
-                                        + " with " + Thread.currentThread().getName()
+                                        + " with" + threadinfo
                                         + " makes request to network at time " + dtf.format(now) 
-                                        + " for message:" + message + "\n");
+                                        + " for message:" + note + "\n");
                 } else if(queue.peek() != null && queue.peek().equals("*")){
                     running = false;
                     close();
                 }
             }
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            //e.printStackTrace();	
+            Thread.currentThread().interrupt();
         }
     } 
     // putting in the queue

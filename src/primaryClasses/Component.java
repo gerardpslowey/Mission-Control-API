@@ -71,11 +71,13 @@ public class Component implements Runnable{
             sendData(); //instruments send Data.
         }
 
+
+
         final String message = reporter;
         Runnable sendMessage = () -> System.out.printf("%s %s: %s%s. %n", mission, compID, sizeAmount, message);
 
         final ScheduledThreadPoolExecutor scheduler = (ScheduledThreadPoolExecutor)Executors.newScheduledThreadPool(1);
-        final ScheduledFuture<?> progressUpdater = scheduler.scheduleAtFixedRate(sendMessage, 2, 20, TimeUnit.SECONDS);
+        final ScheduledFuture<?> progressUpdater = scheduler.scheduleAtFixedRate(sendMessage, 2, 10, TimeUnit.SECONDS);
 
         Runnable progressCanceller = () -> { 
             progressUpdater.cancel(true);

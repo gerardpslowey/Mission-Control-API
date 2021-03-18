@@ -9,8 +9,8 @@ import dataTypes.*;
 public class GroundControl {
     // mission controller is a shared resource used for all missions
     // at least 10 simultaneous missions.
-    private static final int MIN_MISSIONS = 2;
-    private static final int MAX_MISSIONS = 5;          //TODO: SET THESE TO 10 and 200
+    private static final int MIN_MISSIONS = 10;
+    private static final int MAX_MISSIONS = 50;
 
     private static ExecutorService missionPool = Executors.newFixedThreadPool(50);
 
@@ -52,6 +52,7 @@ public class GroundControl {
         }
 
         missionPool.shutdown();
+        
         try{
             latch.await();
             logPool.shutdown();
@@ -69,21 +70,23 @@ public class GroundControl {
             new RocketMan(runner);
 
         } catch (InterruptedException e){
-            e.printStackTrace();
+            //e.printStackTrace();	
+            Thread.currentThread().interrupt();
         }
-        // System.out.println("All the missions have completed!");
     }
 
     private static void process(Object obj, String missionName, Network network, FileLogger logger){
         if (obj instanceof Report) { 
             System.out.println("RR Report Received from " + missionName);
             System.out.println("\t" + "Contents: " + obj);
-            logger.put(missionName + ", " + obj);
+            String threadinfo = Thread.currentThread().getName();
+            logger.put(missionName + ", " + threadinfo + ", " + obj);
         }
 
         if (obj instanceof Message) { 
             System.out.println("MM Message Received from " + missionName + "\n" + "\t" + "Contents: " + obj + "\n");
-            logger.put(missionName + ", " + obj);
+            String threadinfo = Thread.currentThread().getName();
+            logger.put(missionName + ", " + threadinfo + ", " + obj);
         }
 
         if (obj instanceof PatchRequest) { 
@@ -94,13 +97,12 @@ public class GroundControl {
         }
     }
 
-    public static synchronized void commandResponse(Component component){
-        Network network = component.getNetwork();
-        Object x = network.receive();
+    public static synchronized void commandResponse(Mission mission){
+        Network network = mission.getNetwork();
+        // Object x = network.receive();
 
-        if(x instanceof String){
-            System.out.println("\uD83D\uDE00 <- command response to <- " + component.getID());
-            component.notifyAll();
-        }
+        System.out.println("\uD83D\uDE00 <- command response to <- " + mission.getID());
+        network.transmitUpdate("Response");
+        // mission.notifyAll();
     }
 }

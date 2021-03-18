@@ -58,7 +58,8 @@ public class Mission implements Runnable {
             // When waiting a mission sleeps
             Thread.sleep(startTime); 
         } catch (InterruptedException e) {
-            e.printStackTrace();	
+            //e.printStackTrace();	
+            Thread.currentThread().interrupt();
         }
 
         while(missionInProgress){
@@ -79,6 +80,10 @@ public class Mission implements Runnable {
         return this.network;
     }
 
+    public String getID(){
+        return this.id;
+    }
+
     public boolean getMissionProgress(){
         return this.missionInProgress; 
     }
@@ -87,19 +92,13 @@ public class Mission implements Runnable {
         return this.stage.isEmpty();
     }
     private void setDistance(double distance) {
-        // Hard code mission destination distance for the moment
-
         this.distance = Math.ceil((distance / destination) * 100);
     } 
     public double getDistance() {
-        // Hard code mission destination distance for the moment
         return this.distance;
     }
     private double getDestination() {
         return this.destination;
-    }
-    public String getID(){
-        return this.id;
     }
 
 
@@ -189,11 +188,16 @@ public class Mission implements Runnable {
 
     // send reports
     // A variable burst of reports and commands are sent at the transition between mission stages.
-    private void burstOfReports() {
+    private synchronized void burstOfReports() {
         // There are a variable number of types of commands and reports for each mission
-        int reports = SimulateRandomAmountOf.reports();                                       //TODO: BURST REPORT AFTER EACH STAGE.
-        network.transmit(new Report("hi! Sending " + reports + " reports"));
-        // int commands = GroundControl.receiveBurstReports(reports, this.network);              //TODO: REPORTS ARE EITHER TELEMETRY OR DATA
+        // 30% of reports require a command response
+        int chance = SimulateRandomAmountOf.chance();
+        int reports = SimulateRandomAmountOf.reports();
+        network.transmit(new Report("hi!!", reports));
+
+        if(chance < 3){
+            GroundControl.commandResponse(this);
+            }
     }
 
     private void simulateJourneyTime(int journeyTime){
@@ -201,7 +205,8 @@ public class Mission implements Runnable {
         try{ 
             Thread.sleep(journeyTime); 
         } catch (InterruptedException e) {
-            e.printStackTrace();	
+            //e.printStackTrace();	
+            Thread.currentThread().interrupt();
         }
     }
 
@@ -237,7 +242,8 @@ public class Mission implements Runnable {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
-                e.printStackTrace();	
+                //e.printStackTrace();	
+                Thread.currentThread().interrupt();
             }
         }
     }
