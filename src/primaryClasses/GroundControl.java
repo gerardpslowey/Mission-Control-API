@@ -7,12 +7,13 @@ import utils.SimulateRandomAmountOf;
 
 import dataTypes.*;
 import utils.FileLogger;
+import utils.RocketMan;
 
 public class GroundControl {
     // mission controller is a shared resource used for all missions
     // at least 10 simultaneous missions.
-    private static final int MIN_MISSIONS = 10;
-    private static final int MAX_MISSIONS = 20;          //TODO: SET THESE TO 10 and 200
+    private static final int MIN_MISSIONS = 1;
+    private static final int MAX_MISSIONS = 2;          //TODO: SET THESE TO 10 and 200
 
     public static void main(String[] args){
 
@@ -57,6 +58,15 @@ public class GroundControl {
             latch.await();
             logPool.shutdown();
             logger.put("*");
+
+            boolean runner = true;
+            for(Mission mission : missions) {
+                //if the stage is not empty and the mission is finished, then uh oh
+                if(!mission.getStageEmpty() && !mission.getMissionProgress() ){
+                    runner = false;
+                }
+            }
+            new RocketMan(runner);
         } catch (InterruptedException e){
             e.printStackTrace();
         }
