@@ -6,12 +6,15 @@ import utils.SimulateRandomAmountOf;
 import dataTypes.SoftwareUpdate;
 
 import dataTypes.*;
+import utils.SoftwareUpdater;
 
 public class GroundControl {
     // mission controller is a shared resource used for all missions
     // at least 10 simultaneous missions.
     private static final int MIN_MISSIONS = 2;
     private static final int MAX_MISSIONS = 20;          //TODO: SET THESE TO 10 and 200
+
+    private static ExecutorService missionPool = Executors.newFixedThreadPool(50);
 
     public static void main(String[] args){
 
@@ -20,7 +23,6 @@ public class GroundControl {
         System.out.println("Number of Simultaneous Missions: " + missionCount);
         // Each mission can be represented using threads
         // use a thread pool for tasks
-        ExecutorService missionPool = Executors.newFixedThreadPool(50);
 		Mission[] missions = new Mission[missionCount];
 
         for(int i = 0; i < missionCount; i++) {
@@ -39,7 +41,7 @@ public class GroundControl {
                     try {
                         Object obj = missionNetwork.receive();
                         String name = missionNetwork.getName();
-                        process(obj, name);
+                        process(obj, name, missionNetwork);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -47,22 +49,25 @@ public class GroundControl {
             });
         }
 
-        missionPool.shutdown();
+        // missionPool.shutdown();
         // System.out.println("All the missions have completed!");
 
     }
 
-    // poll the networks
-    // public static void listenOnNetwork(Mission[] missions){
-
-    // }
-
-    private static void process(Object obj, String missionName){
+    private static void process(Object obj, String missionName, Network network){
         if (obj instanceof Report) { 
-            System.out.println("Report Received from " + missionName + "\n" + "\t" + "Contents: " + obj);
+            System.out.println("Report Received from " + missionName);
+            System.out.println("\t" + "Contents: " + obj);
         }
-        else if (obj instanceof Message) { 
+
+        if (obj instanceof Message) { 
             System.out.println("Message Received from " + missionName + "\n" + "\t" + "Contents: " + obj + "\n");
+        }
+
+        if (obj instanceof PatchRequest) { 
+            System.out.println("<< Patch Request Received from " + missionName + "\n");
+            // 25% of failures can be recovered from by sending a software upgrade
+            missionPool.execute(new SoftwareUpdater(network));
         }
     }
 

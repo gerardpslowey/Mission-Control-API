@@ -14,8 +14,6 @@ public class Component implements Runnable{
     private Network network;
     private Mission mission;
 
-
-
     public Component(String compID, Network network, Mission mission){
         this.compID = compID;
         this.network = network;
@@ -27,7 +25,6 @@ public class Component implements Runnable{
 
     public void run(){
         sendProgressReport();
-        // System.out.println("Hello from " + compID + ", in mission " + mission); 
     }
 
     public String getID(){
@@ -54,22 +51,40 @@ public class Component implements Runnable{
         return this.network;
     }
 
-    // on a mission it is necessary for all mission components to transmit reports (telemetry) on progress
-    public synchronized void sendProgressReport(){ 
-        Runnable message = () -> System.out.printf("%s %s telemetry message: %s left. %n", mission, compID, sizeAmount);
+    public synchronized void sendProgressReport(){
+        String reporter = "%";
+
+        //"fuel", "thrusters", "powerplants", "controlSystems", "instruments"
+        if(this.getID().equals("fuel")){
+            reporter += " level remaining";
+        } 
+        if(this.getID().equals("thrusters")){
+            reporter += " performance";
+        }
+        if(this.getID().equals("powerplants")){
+            reporter += " heat dissipated";
+        }
+        if(this.getID().equals("controlSystems")){
+            reporter += " efficiency";
+        }
+        else {
+            sendData(); //instruments send Data.
+        }
+
+        final String message = reporter;
+        Runnable sendMessage = () -> System.out.printf("%s %s: %s%s. %n", mission, compID, sizeAmount, message);
 
         final ScheduledThreadPoolExecutor scheduler = (ScheduledThreadPoolExecutor)Executors.newScheduledThreadPool(1);
-        final ScheduledFuture<?> progressUpdater = scheduler.scheduleAtFixedRate(message, 2, 20, TimeUnit.SECONDS);
+        final ScheduledFuture<?> progressUpdater = scheduler.scheduleAtFixedRate(sendMessage, 2, 20, TimeUnit.SECONDS);
 
-        scheduler.schedule(new Runnable() {
-
-            @Override
-            public void run(){
-                progressUpdater.cancel(true);
-                scheduler.shutdown();
-            }
-        }, 10, TimeUnit.SECONDS);
+        Runnable progressCanceller = () -> { 
+            progressUpdater.cancel(true);
+            scheduler.shutdown();
+        };
+        scheduler.schedule(progressCanceller, 60, TimeUnit.SECONDS);
     }
+
+
 
     // instruments send data on a regular basis
     public synchronized void sendData(){ 

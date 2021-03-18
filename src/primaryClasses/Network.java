@@ -16,7 +16,7 @@ public class Network {
 
     // represent the communications networks (queues) 
     private BlockingQueue<Object> inputData;
-    private final BlockingQueue<String> outputData;
+    private final BlockingQueue<Object> outputData;
 
     public Network(String name) {
         this.name = name;
@@ -98,9 +98,29 @@ public class Network {
         return "";
     } 
 
+    public Object receiveUpdate() {
+        try{            
+            // simulate latency on the network
+            Thread.sleep(simulateLatency());
+            
+            return this.outputData.take();
+        } catch (InterruptedException e) { 
+            Thread.currentThread().interrupt();        
+        } 
+        return "";
+    } 
+
     public void transmit(Object data){
         try{
             this.inputData.put(data);
+        } catch (InterruptedException e) { 
+            Thread.currentThread().interrupt();        
+        }  
+    }
+
+    public void transmitUpdate(Object data){
+        try{
+            this.outputData.put(data);
         } catch (InterruptedException e) { 
             Thread.currentThread().interrupt();        
         }  
