@@ -24,7 +24,7 @@ public class Network {
         // the network has limited bandwidth
         this.bandwidth = setbandwith(availability);
         // communications are subject to increasing delays as the mission travels further away from Earth
-        this.latency = setNetworkLatency(200);
+        this.latency = setNetworkLatency(0);
         this.inputData = new LinkedBlockingQueue<>(bandwidth);
         this.outputData = new LinkedBlockingQueue<>(bandwidth);
     }

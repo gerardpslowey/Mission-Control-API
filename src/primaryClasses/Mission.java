@@ -154,7 +154,7 @@ public class Mission implements Runnable {
         int failTen = SimulateRandomAmountOf.chance();
         if(failTen == 1){
             System.out.printf("!! %s System failure during %s! Requesting fix from Ground Control.%n", id, stage);
-            // network.transmit(new dataTypes.PatchRequest("request"));
+            network.transmit(new dataTypes.PatchRequest("request"));
             
             // block until the update arrives 
             // Object update = network.receiveUpdate();
@@ -172,7 +172,6 @@ public class Mission implements Runnable {
     private void burstOfReports() {
         // There are a variable number of types of commands and reports for each mission
         int reports = SimulateRandomAmountOf.reports();                                       //TODO: BURST REPORT AFTER EACH STAGE.
-        // System.out.println("New Report" + reports);
         network.transmit(new Report("hello"));
         // int commands = GroundControl.receiveBurstReports(reports, this.network);              //TODO: REPORTS ARE EITHER TELEMETRY OR DATA
     }
