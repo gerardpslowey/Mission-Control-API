@@ -1,6 +1,7 @@
 package primaryClasses;
 
 import java.util.concurrent.Executors;
+import java.lang.System.Logger;
 import java.util.concurrent.ExecutorService;
 import utils.SimulateRandomAmountOf;
 import dataTypes.SoftwareUpdate;
@@ -22,6 +23,7 @@ public class GroundControl {
         // use a thread pool for tasks
         ExecutorService missionPool = Executors.newFixedThreadPool(50);
 		Mission[] missions = new Mission[missionCount];
+
 
         for(int i = 0; i < missionCount; i++) {
             int startTime = SimulateRandomAmountOf.days();

@@ -164,7 +164,7 @@ public class Mission implements Runnable {
 
     // send reports
     // A variable burst of reports and commands are sent at the transition between mission stages.
-    private void burstOfReports(){
+    private void burstOfReports() {
         // There are a variable number of types of commands and reports for each mission
         int reports = SimulateRandomAmountOf.reports();                                       //TODO: BURST REPORT AFTER EACH STAGE.
         // System.out.println("New Report" + reports);
