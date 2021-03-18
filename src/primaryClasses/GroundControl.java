@@ -44,7 +44,7 @@ public class GroundControl {
                     try {
                         Object obj = missionNetwork.receive();
                         String name = missionNetwork.getName();
-                        process(obj, name, missionNetwork);
+                        process(obj, name, missionNetwork, logger);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -64,14 +64,16 @@ public class GroundControl {
         // System.out.println("All the missions have completed!");
     }
 
-    private static void process(Object obj, String missionName, Network network){
+    private static void process(Object obj, String missionName, Network network, FileLogger logger){
         if (obj instanceof Report) { 
             System.out.println("RR Report Received from " + missionName);
             System.out.println("\t" + "Contents: " + obj);
+            logger.put(missionName);
         }
 
         if (obj instanceof Message) { 
             System.out.println("MM Message Received from " + missionName + "\n" + "\t" + "Contents: " + obj + "\n");
+            logger.put(missionName);
         }
 
         if (obj instanceof PatchRequest) { 
