@@ -78,6 +78,10 @@ public class Mission implements Runnable {
         return this.network;
     }
 
+    public String getID(){
+        return this.id;
+    }
+
     public boolean getMissionProgress(){
         return this.missionInProgress; 
     }
@@ -171,11 +175,16 @@ public class Mission implements Runnable {
 
     // send reports
     // A variable burst of reports and commands are sent at the transition between mission stages.
-    private void burstOfReports() {
+    private synchronized void burstOfReports() {
         // There are a variable number of types of commands and reports for each mission
-        int reports = SimulateRandomAmountOf.reports();                                       //TODO: BURST REPORT AFTER EACH STAGE.
-        network.transmit(new Report("hello"));
-        // int commands = GroundControl.receiveBurstReports(reports, this.network);              //TODO: REPORTS ARE EITHER TELEMETRY OR DATA
+        // 30% of reports require a command response
+        int chance = SimulateRandomAmountOf.chance();
+        int reports = SimulateRandomAmountOf.reports();
+        network.transmit(new Report("hello", reports));
+
+        if(chance < 3){
+            GroundControl.commandResponse(this);
+            }
     }
 
     private void simulateJourneyTime(int journeyTime){

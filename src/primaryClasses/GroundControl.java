@@ -54,6 +54,7 @@ public class GroundControl {
         }
 
         missionPool.shutdown();
+        
         try{
             latch.await();
             logPool.shutdown();
@@ -84,13 +85,12 @@ public class GroundControl {
         }
     }
 
-    public static synchronized void commandResponse(Component component){
-        Network network = component.getNetwork();
-        Object x = network.receive();
+    public static synchronized void commandResponse(Mission mission){
+        Network network = mission.getNetwork();
+        // Object x = network.receive();
 
-        if(x instanceof String){
-            System.out.println("\uD83D\uDE00 <- command response to <- " + component.getID());
-            component.notifyAll();
-        }
+        System.out.println("\uD83D\uDE00 <- command response to <- " + mission.getID());
+        network.transmitUpdate("Response");
+        // mission.notifyAll();
     }
 }
