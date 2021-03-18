@@ -1,4 +1,4 @@
-package utils;
+package dataTypes;
 
 public class SoftwareUpdate {
 
