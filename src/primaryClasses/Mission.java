@@ -3,8 +3,6 @@ package primaryClasses;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import dataTypes.*;
-
-import utils.SoftwareUpdater;
 import utils.SimulateRandomAmountOf;
 
 public class Mission implements Runnable {
