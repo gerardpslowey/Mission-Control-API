@@ -1,10 +1,9 @@
 package utils;
 
-import java.util.concurrent.Callable;
 import primaryClasses.Network;
 import dataTypes.SoftwareUpdate;
 
-public class SoftwareUpdater implements Callable<Boolean> { 
+public class SoftwareUpdater implements Runnable { 
 
 	Network network;
     
@@ -14,10 +13,7 @@ public class SoftwareUpdater implements Callable<Boolean> {
 	} 
 
 	@Override 
-    public Boolean call() 
-	{ 
-        boolean success = true;
-
+    public void run() {
         try {
             int[] patchDetails = getPatchDetails();
 
@@ -32,21 +28,12 @@ public class SoftwareUpdater implements Callable<Boolean> {
             Thread.sleep((long) buildTime * 33);
             System.out.println("Developers finished building and testing period");
             System.out.println("Patch in Network Pipeline"); 
-            network.transmit(new SoftwareUpdate(patchSize)); 
-
-            // TODO move this
-            // 25% chance of failure of install
-            int failFour = SimulateRandomAmountOf.chance();
-
-            if(failFour <= 4){
-                success = false;
-            }
+            network.transmitUpdate(new SoftwareUpdate(patchSize)); 
         } 
+        
         catch (InterruptedException e) { 
             e.printStackTrace();	
         }
-        
-        return success;
     }
 
     // updates take a variable number of days to develop and is a variable size in MB.        

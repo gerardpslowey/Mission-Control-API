@@ -4,15 +4,17 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import utils.SimulateRandomAmountOf;
-
-import dataTypes.*;
 import utils.FileLogger;
+import dataTypes.*;
+import utils.SoftwareUpdater;
 
 public class GroundControl {
     // mission controller is a shared resource used for all missions
     // at least 10 simultaneous missions.
-    private static final int MIN_MISSIONS = 10;
-    private static final int MAX_MISSIONS = 20;          //TODO: SET THESE TO 10 and 200
+    private static final int MIN_MISSIONS = 2;
+    private static final int MAX_MISSIONS = 5;          //TODO: SET THESE TO 10 and 200
+
+    private static ExecutorService missionPool = Executors.newFixedThreadPool(50);
 
     public static void main(String[] args){
 
@@ -37,13 +39,12 @@ public class GroundControl {
 
         // Poll the networks with a thread each
         for(Mission mission : missions) {
-            
             Runnable runnable = () -> {
                 Network missionNetwork = mission.getNetwork(); 
                     try {
                         Object obj = missionNetwork.receive();
                         String name = missionNetwork.getName();
-                        process(obj, name, logger);
+                        process(obj, name, missionNetwork);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -61,22 +62,23 @@ public class GroundControl {
             e.printStackTrace();
         }
         // System.out.println("All the missions have completed!");
-
     }
 
-    // poll the networks
-    // public static void listenOnNetwork(Mission[] missions){
-
-    // }
-
-    private static void process(Object obj, String missionName, FileLogger logger){
+    private static void process(Object obj, String missionName, Network network){
         if (obj instanceof Report) { 
-            System.out.println("Report Received from " + missionName + "\n" + "\t" + "Contents: " + obj);
-            logger.put(missionName);
+            System.out.println("RR Report Received from " + missionName);
+            System.out.println("\t" + "Contents: " + obj);
         }
-        else if (obj instanceof Message) { 
-            System.out.println("Message Received from " + missionName + "\n" + "\t" + "Contents: " + obj + "\n");
-            logger.put(missionName);
+
+        if (obj instanceof Message) { 
+            System.out.println("MM Message Received from " + missionName + "\n" + "\t" + "Contents: " + obj + "\n");
+        }
+
+        if (obj instanceof PatchRequest) { 
+            System.out.println("PR Patch Request Received from " + missionName + "\n");
+            // 25% of failures can be recovered from by sending a software upgrade
+            // Software upgrades must be transmitted from the mission controller
+            missionPool.execute(new SoftwareUpdater(network));
         }
     }
 
@@ -88,13 +90,5 @@ public class GroundControl {
             System.out.println("\uD83D\uDE00 <- command response to <- " + component.getID());
             component.notifyAll();
         }
-    }
-
-    // software updates
-    // Software upgrades must be transmitted from the mission controller
-    public static void transmitSoftwareUpgrade(Component component){
-        SoftwareUpdate update = new SoftwareUpdate(2);
-        Network network = component.getNetwork();
-        network.transmit(update);
     }
 }

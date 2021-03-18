@@ -2,13 +2,8 @@ package primaryClasses;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Future; 
-import java.util.concurrent.ExecutionException;
 import dataTypes.*;
-
-import utils.SoftwareUpdater;
 import utils.SimulateRandomAmountOf;
 
 public class Mission implements Runnable {
@@ -161,8 +156,16 @@ public class Mission implements Runnable {
         int failTen = SimulateRandomAmountOf.chance();
         if(failTen == 1){
             System.out.printf("!! %s System failure during %s! Requesting fix from Ground Control.%n", id, stage);
-            success = fixSoftwareFailure();
+            network.transmit(new dataTypes.PatchRequest("request"));
+            
+            // block until the update arrives 
+            // Object update = network.receiveUpdate();
+            // SoftwareUpdate sw = (SoftwareUpdate) update;
+
+            SoftwareUpdate sw = new SoftwareUpdate(420);
+            success = installUpdate(sw);
         }
+
         return success;
     }
 
@@ -171,7 +174,6 @@ public class Mission implements Runnable {
     private void burstOfReports() {
         // There are a variable number of types of commands and reports for each mission
         int reports = SimulateRandomAmountOf.reports();                                       //TODO: BURST REPORT AFTER EACH STAGE.
-        // System.out.println("New Report" + reports);
         network.transmit(new Report("hello"));
         // int commands = GroundControl.receiveBurstReports(reports, this.network);              //TODO: REPORTS ARE EITHER TELEMETRY OR DATA
     }
@@ -188,34 +190,27 @@ public class Mission implements Runnable {
     private void printSuccessStatus(String id, String stage){
         System.out.printf("%s had no system failures during %s.%n", id, stage);
     }
-    
 
-    // 25% of failures can be recovered from by sending a software upgrade
-    private boolean fixSoftwareFailure(){
+    public boolean installUpdate(SoftwareUpdate update){
+        int failFour = SimulateRandomAmountOf.chance();
 
-        Callable<Boolean> updater = new SoftwareUpdater(network);
-        Future<Boolean> fixed = componentPool.submit(updater);
-        boolean success;
-
-        try {
-            success = fixed.get().booleanValue();
-            if(!success){
-                System.out.printf("XX %s upgrade has failed during %s. %1$s aborted.%n", id, stage);
-            }
-            else{
-                showUpdateProgress();
-                System.out.printf("++ %s software upgrade successfully applied.%n", id);
-            }
-            return success;
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();	
+        // 25% chance of failure of install
+        if(failFour <= 4){
+            System.out.printf("XX %s upgrade has failed during %s. %1$s aborted.%n", id, stage);
+            return false;
         }
-    return false;
+        else{
+            showUpdateProgress(update);
+            System.out.printf("++ %s software upgrade successfully applied.%n", id);
+            return true;
+        }
     }
-
-    // TODO change this depending on bandwidth and update size
-    public static void showUpdateProgress() {
+    
+    public static void showUpdateProgress(SoftwareUpdate update) {
         char[] animationChars = new char[]{'|', '/', '-', '\\'};
+
+        // TODO change this depending on bandwidth and update size
+        int updateSize = update.getUpdateSize();
 
         for (int i = 0; i <= 100; i+=10) {
             System.out.print("Installing: " + i + "% " + animationChars[i % 4] + "\r");

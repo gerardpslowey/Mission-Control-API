@@ -2,10 +2,13 @@ package dataTypes;
 
 public class SoftwareUpdate {
 
-    int updateSize;
+    private int updateSize;
 
     public SoftwareUpdate(int updateSize){
         this.updateSize = updateSize;
     }
     
+    public int getUpdateSize(){
+        return this.updateSize;
+    }
 }

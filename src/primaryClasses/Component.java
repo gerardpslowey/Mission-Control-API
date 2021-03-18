@@ -25,7 +25,6 @@ public class Component implements Runnable{
 
     public void run(){
         sendProgressReport();
-        // System.out.println("Hello from " + compID + ", in mission " + mission); 
     }
 
     public String getID(){
@@ -52,7 +51,6 @@ public class Component implements Runnable{
         return this.network;
     }
 
-    // on a mission it is necessary for all mission components to transmit reports (telemetry) on progress
     public synchronized void sendProgressReport(){
         String reporter = "%";
 
