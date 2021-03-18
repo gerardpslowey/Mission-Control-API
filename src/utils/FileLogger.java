@@ -3,6 +3,8 @@ package utils;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.time.format.DateTimeFormatter;  
 import java.time.LocalDateTime;    
@@ -28,11 +30,20 @@ public class FileLogger implements Runnable {
     public void run() {
         try{
             Thread.sleep(20);
+            // “Mission Component # with (Thread ID) # makes request to network # at time # for message #.”
             while(running){
                 if(queue.peek() != null && !queue.peek().equals("*")){
                     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
                     LocalDateTime now = LocalDateTime.now();
-                    printWriter.print(queue.poll() + " makes request to network at " + dtf.format(now) + "\n");
+
+                    List<String> log = Arrays.asList(queue.poll().split(","));
+                    String mission = log.get(0);
+                    String message = log.get(1);
+
+                    printWriter.print("Mission Component " + mission.substring(mission.length() - 2)
+                                        + " with " + Thread.currentThread().getName()
+                                        + " makes request to network at time " + dtf.format(now) 
+                                        + " for message:" + message + "\n");
                 } else if(queue.peek() != null && queue.peek().equals("*")){
                     running = false;
                     close();
@@ -45,11 +56,6 @@ public class FileLogger implements Runnable {
     // putting in the queue
     public void put(String message){
         this.message = message;
-        // if(message.equals("*")){
-        //     System.out.println("Closing the logger");
-        // } else {
-        //     System.out.println("Logging contents");
-        // }
         queue.add(message);
     }
 

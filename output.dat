@@ -1,15 +1,3 @@
 The Rocket Scientist Problem 
-Network M3 makes request to network at 2021/03/18 18:13:22
-Network M0 makes request to network at 2021/03/18 18:13:22
-Network M5 makes request to network at 2021/03/18 18:13:22
-Network M12 makes request to network at 2021/03/18 18:13:22
-Network M8 makes request to network at 2021/03/18 18:13:22
-Network M10 makes request to network at 2021/03/18 18:13:22
-Network M4 makes request to network at 2021/03/18 18:13:22
-Network M13 makes request to network at 2021/03/18 18:13:22
-Network M7 makes request to network at 2021/03/18 18:13:22
-Network M9 makes request to network at 2021/03/18 18:13:22
-Network M16 makes request to network at 2021/03/18 18:13:22
-Network M14 makes request to network at 2021/03/18 18:13:22
-Network M11 makes request to network at 2021/03/18 18:13:22
-Network M15 makes request to network at 2021/03/18 18:13:22
+Mission Component M0 with pool-3-thread-1 makes request to network at time 2021/03/18 23:44:53 for message: hi! Sending 2 reports
+Mission Component M2 with pool-3-thread-1 makes request to network at time 2021/03/18 23:44:53 for message: hi! Sending 2 reports

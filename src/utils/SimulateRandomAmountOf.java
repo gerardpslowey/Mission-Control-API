@@ -48,7 +48,7 @@ public final class SimulateRandomAmountOf {
     }
 
     public static synchronized int size(String id){
-        int lowerLimit = 1;
+        int lowerLimit = 10;
         int upperLimit = 100;
         switch(id) {
             case "fuel":

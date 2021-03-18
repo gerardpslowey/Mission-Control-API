@@ -3,10 +3,8 @@ package primaryClasses;
 import java.util.concurrent.Executors;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
-import utils.SimulateRandomAmountOf;
-import utils.FileLogger;
+import utils.*;
 import dataTypes.*;
-import utils.SoftwareUpdater;
 
 public class GroundControl {
     // mission controller is a shared resource used for all missions
@@ -58,6 +56,18 @@ public class GroundControl {
             latch.await();
             logPool.shutdown();
             logger.put("*");
+
+            boolean runner = true;
+            for(Mission mission : missions) {
+                //if the stage is not empty and the mission is finished, then uh oh
+                if(!mission.getStageEmpty() && !mission.getMissionProgress() ){
+                    
+                    System.out.println("Oh No! " + mission.getID() + " failed.");
+                    runner = false;
+                }
+            }
+            new RocketMan(runner);
+
         } catch (InterruptedException e){
             e.printStackTrace();
         }
@@ -68,12 +78,12 @@ public class GroundControl {
         if (obj instanceof Report) { 
             System.out.println("RR Report Received from " + missionName);
             System.out.println("\t" + "Contents: " + obj);
-            logger.put(missionName);
+            logger.put(missionName + ", " + obj);
         }
 
         if (obj instanceof Message) { 
             System.out.println("MM Message Received from " + missionName + "\n" + "\t" + "Contents: " + obj + "\n");
-            logger.put(missionName);
+            logger.put(missionName + ", " + obj);
         }
 
         if (obj instanceof PatchRequest) { 

@@ -16,7 +16,8 @@ public class Mission implements Runnable {
     private Component[] components = new Component[5];
     private CountDownLatch countDownLatch;
 
-    private int destination;
+    private double destination;
+    private double distance = 0;
 
     // communication networks for a mission are a shared resource used by all mission components
     // each mission has its own network
@@ -82,12 +83,25 @@ public class Mission implements Runnable {
         return this.missionInProgress; 
     }
 
-    private static int simulateMissionDistance() {
+    public boolean getStageEmpty(){
+        return this.stage.isEmpty();
+    }
+    private void setDistance(double distance) {
         // Hard code mission destination distance for the moment
-        final int distance = 100;
-        // TODO
-        return distance;
+
+        this.distance = Math.ceil((distance / destination) * 100);
     } 
+    public double getDistance() {
+        // Hard code mission destination distance for the moment
+        return this.distance;
+    }
+    private double getDestination() {
+        return this.destination;
+    }
+    public String getID(){
+        return this.id;
+    }
+
 
     // move missions along their stages
     public void changeStage(){
@@ -102,6 +116,7 @@ public class Mission implements Runnable {
                     // effectively instant events
                     printSuccessStatus(id, stage);
                     burstOfReports();
+                    setDistance(destination *.1);
                     stage = "transit";
                 } else {
                     missionInProgress = false;
@@ -114,6 +129,7 @@ public class Mission implements Runnable {
                     simulateJourneyTime(journeyTime);
                     printSuccessStatus(id, stage);
                     burstOfReports();
+                    setDistance(destination *.4);
                     stage = "landing";
                 } else {
                     missionInProgress = false;
@@ -125,6 +141,7 @@ public class Mission implements Runnable {
                     // effectively instant events
                     printSuccessStatus(id, stage);
                     burstOfReports();
+                    setDistance(destination *.5);
                     stage = "explore";
                 } else {
                     missionInProgress = false;
@@ -137,6 +154,7 @@ public class Mission implements Runnable {
                     simulateJourneyTime(journeyTime);
                     printSuccessStatus(id, stage);
                     burstOfReports();
+                    setDistance(destination);
                     stage = "";
                 }
                 missionInProgress = false;
@@ -174,7 +192,7 @@ public class Mission implements Runnable {
     private void burstOfReports() {
         // There are a variable number of types of commands and reports for each mission
         int reports = SimulateRandomAmountOf.reports();                                       //TODO: BURST REPORT AFTER EACH STAGE.
-        network.transmit(new Report("hello"));
+        network.transmit(new Report("hi! Sending " + reports + " reports"));
         // int commands = GroundControl.receiveBurstReports(reports, this.network);              //TODO: REPORTS ARE EITHER TELEMETRY OR DATA
     }
 
@@ -189,6 +207,7 @@ public class Mission implements Runnable {
 
     private void printSuccessStatus(String id, String stage){
         System.out.printf("%s had no system failures during %s.%n", id, stage);
+        System.out.printf("%s%% of %s travelled of %skm %n",this.getDistance(), this.getID(), this.getDestination());
     }
 
     public boolean installUpdate(SoftwareUpdate update){
