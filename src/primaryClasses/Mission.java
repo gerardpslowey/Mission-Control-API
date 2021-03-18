@@ -154,12 +154,13 @@ public class Mission implements Runnable {
         int failTen = SimulateRandomAmountOf.chance();
         if(failTen == 1){
             System.out.printf("!! %s System failure during %s! Requesting fix from Ground Control.%n", id, stage);
-            network.transmit(new dataTypes.PatchRequest("request"));
+            // network.transmit(new dataTypes.PatchRequest("request"));
             
             // block until the update arrives 
-            Object update = network.receiveUpdate();
-            SoftwareUpdate sw = (SoftwareUpdate) update;
+            // Object update = network.receiveUpdate();
+            // SoftwareUpdate sw = (SoftwareUpdate) update;
 
+            SoftwareUpdate sw = new SoftwareUpdate(420);
             success = installUpdate(sw);
         }
 

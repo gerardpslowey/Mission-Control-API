@@ -81,10 +81,8 @@ public class Component implements Runnable{
             progressUpdater.cancel(true);
             scheduler.shutdown();
         };
-        scheduler.schedule(progressCanceller, 60, TimeUnit.SECONDS);
+        scheduler.schedule(progressCanceller, 10, TimeUnit.SECONDS);
     }
-
-
 
     // instruments send data on a regular basis
     public synchronized void sendData(){ 
