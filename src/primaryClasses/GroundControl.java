@@ -12,8 +12,8 @@ import utils.RocketMan;
 public class GroundControl {
     // mission controller is a shared resource used for all missions
     // at least 10 simultaneous missions.
-    private static final int MIN_MISSIONS = 1;
-    private static final int MAX_MISSIONS = 2;          //TODO: SET THESE TO 10 and 200
+    private static final int MIN_MISSIONS = 5;
+    private static final int MAX_MISSIONS = 6;          //TODO: SET THESE TO 10 and 200
 
     public static void main(String[] args){
 

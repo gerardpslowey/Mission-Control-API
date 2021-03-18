@@ -22,7 +22,7 @@ public class Mission implements Runnable {
     private CountDownLatch countDownLatch;
 
     private double destination;
-    private double distance = 0;
+    private double distance = 1;
 
     // communication networks for a mission are a shared resource used by all mission components
     // each mission has its own network
@@ -93,7 +93,7 @@ public class Mission implements Runnable {
 
         this.distance = Math.ceil((distance / destination) * 100);
     } 
-    private double getDistance() {
+    public double getDistance() {
         // Hard code mission destination distance for the moment
         return this.distance;
     }

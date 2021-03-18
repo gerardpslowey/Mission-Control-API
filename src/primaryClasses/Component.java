@@ -9,7 +9,7 @@ import utils.SimulateRandomAmountOf;
 public class Component implements Runnable{
 
     private String compID;
-    private Integer sizeAmount;
+    private double sizeAmount;
     private Integer reportRate;
     private Network network;
     private Mission mission;
@@ -32,11 +32,11 @@ public class Component implements Runnable{
         return compID;
     }
 
-    public Integer getSize(){
+    public double getSize(){
         return sizeAmount;
     }
 
-    public void setSize(Integer sizeAmount){
+    public void setSize(double sizeAmount){
         this.sizeAmount = sizeAmount;
     }
 
@@ -74,7 +74,10 @@ public class Component implements Runnable{
         }
 
         final String message = reporter;
-        Runnable sendMessage = () -> System.out.printf("%s %s: %s%s. %n", mission, compID, sizeAmount, message);
+        Runnable sendMessage = () -> {
+            System.out.printf(">>>>>>>>>>>>>>> %s %s: %s%s. %n", mission, compID, sizeAmount, message);
+            setSize(sizeAmount * mission.getDistance());
+        };
 
         final ScheduledThreadPoolExecutor scheduler = (ScheduledThreadPoolExecutor)Executors.newScheduledThreadPool(1);
         final ScheduledFuture<?> progressUpdater = scheduler.scheduleAtFixedRate(sendMessage, 2, 20, TimeUnit.SECONDS);
