@@ -56,7 +56,7 @@ public class Component implements Runnable{
 
     // on a mission it is necessary for all mission components to transmit reports (telemetry) on progress
     public synchronized void sendProgressReport(){ 
-        Runnable message = () -> System.out.printf("%s telemetry message: %s left. %n", compID, sizeAmount);
+        Runnable message = () -> System.out.printf("%s %s telemetry message: %s left. %n", mission, compID, sizeAmount);
 
         final ScheduledThreadPoolExecutor scheduler = (ScheduledThreadPoolExecutor)Executors.newScheduledThreadPool(1);
         final ScheduledFuture<?> progressUpdater = scheduler.scheduleAtFixedRate(message, 2, 20, TimeUnit.SECONDS);

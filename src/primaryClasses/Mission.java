@@ -167,8 +167,8 @@ public class Mission implements Runnable {
     private void burstOfReports(){
         // There are a variable number of types of commands and reports for each mission
         int reports = SimulateRandomAmountOf.reports();                                       //TODO: BURST REPORT AFTER EACH STAGE.
-        System.out.println("New Report" + reports);
-        // network.transmit(new Message("hello", 42));
+        // System.out.println("New Report" + reports);
+        network.transmit(new Report("hello"));
         // int commands = GroundControl.receiveBurstReports(reports, this.network);              //TODO: REPORTS ARE EITHER TELEMETRY OR DATA
     }
 

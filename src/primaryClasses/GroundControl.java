@@ -11,7 +11,7 @@ public class GroundControl {
     // mission controller is a shared resource used for all missions
     // at least 10 simultaneous missions.
     private static final int MIN_MISSIONS = 2;
-    private static final int MAX_MISSIONS = 5;          //TODO: SET THESE TO 10 and 200
+    private static final int MAX_MISSIONS = 20;          //TODO: SET THESE TO 10 and 200
 
     public static void main(String[] args){
 
@@ -29,8 +29,23 @@ public class GroundControl {
 			missionPool.execute(missions[i]);
         }
 
-        // Poll the networks
-        // listenOnNetwork(missions);
+        // Poll the networks with a thread each
+        for(Mission mission : missions) {
+            missionPool.execute(new Runnable() {
+                @Override
+                public void run(){
+                    Network missionNetwork = mission.getNetwork(); 
+
+                    try {
+                        Object obj = missionNetwork.receive();
+                        String name = missionNetwork.getName();
+                        process(obj, name);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }         
+            });
+        }
 
         missionPool.shutdown();
         // System.out.println("All the missions have completed!");
@@ -38,21 +53,9 @@ public class GroundControl {
     }
 
     // poll the networks
-    public static void listenOnNetwork(Mission[] missions){
-        while(true){
-            for(Mission mission : missions){          
-                Network missionNetwork = mission.getNetwork();    
-                
-                try {
-                    Object obj = missionNetwork.receive();
-                    String name = missionNetwork.getName();
-                    process(obj, name);
-                } catch (Exception e){
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
+    // public static void listenOnNetwork(Mission[] missions){
+
+    // }
 
     private static void process(Object obj, String missionName){
         if (obj instanceof Report) { 
