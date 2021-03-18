@@ -2,7 +2,8 @@ package primaryClasses;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Callable; 
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future; 
 import java.util.concurrent.ExecutionException;
 import dataTypes.*;
@@ -18,6 +19,7 @@ public class Mission implements Runnable {
     private String stage = "launch";
     private boolean missionInProgress = true;
     private Component[] components = new Component[5];
+    private CountDownLatch countDownLatch;
 
     private int destination;
 
@@ -30,7 +32,7 @@ public class Mission implements Runnable {
 
     // Depending on the mission target, each mission must be allocated variable supplies of 
     // fuel, thrusters, instruments, control systems and powerplants
-    public Mission(String id, long startTime){
+    public Mission(String id, long startTime, CountDownLatch countDownLatch){
         this.id = id;
         // missions are generated with a random start time
         this.startTime = startTime;
@@ -38,6 +40,7 @@ public class Mission implements Runnable {
         this.network = new Network("Network " + id);
         // construct the mission vehicles from components,
         map = new String[] {"fuel", "thrusters", "powerplants", "controlSystems", "instruments"};
+        this.countDownLatch = countDownLatch;
 
         for (int i = 0; i < map.length; i++){
             components[i] = new Component(map[i], this.network, this);
@@ -72,7 +75,8 @@ public class Mission implements Runnable {
             System.out.printf("%s has completed successfully!%n", id);
         }
 
-        componentPool.shutdown();        
+        componentPool.shutdown();
+        countDownLatch.countDown();        
     }
 
     public Network getNetwork(){

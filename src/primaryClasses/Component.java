@@ -14,8 +14,6 @@ public class Component implements Runnable{
     private Network network;
     private Mission mission;
 
-
-
     public Component(String compID, Network network, Mission mission){
         this.compID = compID;
         this.network = network;

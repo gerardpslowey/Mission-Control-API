@@ -1,6 +1,7 @@
 package primaryClasses;
 
 import java.util.concurrent.Executors;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import utils.SimulateRandomAmountOf;
 
@@ -10,8 +11,8 @@ import utils.FileLogger;
 public class GroundControl {
     // mission controller is a shared resource used for all missions
     // at least 10 simultaneous missions.
-    private static final int MIN_MISSIONS = 1;
-    private static final int MAX_MISSIONS = 2;          //TODO: SET THESE TO 10 and 200
+    private static final int MIN_MISSIONS = 10;
+    private static final int MAX_MISSIONS = 20;          //TODO: SET THESE TO 10 and 200
 
     public static void main(String[] args){
 
@@ -21,15 +22,18 @@ public class GroundControl {
         // Each mission can be represented using threads
         // use a thread pool for tasks
         ExecutorService missionPool = Executors.newFixedThreadPool(50);
+        CountDownLatch latch = new CountDownLatch(missionCount);
 		Mission[] missions = new Mission[missionCount];
+
+        ExecutorService logPool = Executors.newSingleThreadExecutor();
         FileLogger logger = new FileLogger();
+        logPool.execute(logger);
 
         for(int i = 0; i < missionCount; i++) {
             int startTime = SimulateRandomAmountOf.days();
-			missions[i] = new Mission("M" + i, startTime);
+			missions[i] = new Mission("M" + i, startTime, latch);
 			missionPool.execute(missions[i]);
         }
-        missionPool.execute(logger);
 
         // Poll the networks with a thread each
         for(Mission mission : missions) {
@@ -49,7 +53,13 @@ public class GroundControl {
         }
 
         missionPool.shutdown();
-        logger.put("*");
+        try{
+            latch.await();
+            logPool.shutdown();
+            logger.put("*");
+        } catch (InterruptedException e){
+            e.printStackTrace();
+        }
         // System.out.println("All the missions have completed!");
 
     }
