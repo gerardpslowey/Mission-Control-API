@@ -1,18 +1,17 @@
 package primaryClasses;
 
 import java.util.concurrent.Executors;
-import java.lang.System.Logger;
 import java.util.concurrent.ExecutorService;
 import utils.SimulateRandomAmountOf;
-import dataTypes.SoftwareUpdate;
 
 import dataTypes.*;
+import utils.FileLogger;
 
 public class GroundControl {
     // mission controller is a shared resource used for all missions
     // at least 10 simultaneous missions.
-    private static final int MIN_MISSIONS = 2;
-    private static final int MAX_MISSIONS = 20;          //TODO: SET THESE TO 10 and 200
+    private static final int MIN_MISSIONS = 1;
+    private static final int MAX_MISSIONS = 2;          //TODO: SET THESE TO 10 and 200
 
     public static void main(String[] args){
 
@@ -23,33 +22,34 @@ public class GroundControl {
         // use a thread pool for tasks
         ExecutorService missionPool = Executors.newFixedThreadPool(50);
 		Mission[] missions = new Mission[missionCount];
-
+        FileLogger logger = new FileLogger();
 
         for(int i = 0; i < missionCount; i++) {
             int startTime = SimulateRandomAmountOf.days();
 			missions[i] = new Mission("M" + i, startTime);
 			missionPool.execute(missions[i]);
         }
+        missionPool.execute(logger);
 
         // Poll the networks with a thread each
         for(Mission mission : missions) {
-            missionPool.execute(new Runnable() {
-                @Override
-                public void run(){
-                    Network missionNetwork = mission.getNetwork(); 
-
+            
+            Runnable runnable = () -> {
+                Network missionNetwork = mission.getNetwork(); 
                     try {
                         Object obj = missionNetwork.receive();
                         String name = missionNetwork.getName();
-                        process(obj, name);
+                        process(obj, name, logger);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                }         
-            });
+                };
+
+            missionPool.execute(runnable);
         }
 
         missionPool.shutdown();
+        logger.put("*");
         // System.out.println("All the missions have completed!");
 
     }
@@ -59,12 +59,14 @@ public class GroundControl {
 
     // }
 
-    private static void process(Object obj, String missionName){
+    private static void process(Object obj, String missionName, FileLogger logger){
         if (obj instanceof Report) { 
             System.out.println("Report Received from " + missionName + "\n" + "\t" + "Contents: " + obj);
+            logger.put(missionName);
         }
         else if (obj instanceof Message) { 
             System.out.println("Message Received from " + missionName + "\n" + "\t" + "Contents: " + obj + "\n");
+            logger.put(missionName);
         }
     }
 
