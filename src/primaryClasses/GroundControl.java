@@ -3,7 +3,6 @@ package primaryClasses;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import utils.SimulateRandomAmountOf;
-import dataTypes.SoftwareUpdate;
 
 import dataTypes.*;
 import utils.SoftwareUpdater;
@@ -11,8 +10,8 @@ import utils.SoftwareUpdater;
 public class GroundControl {
     // mission controller is a shared resource used for all missions
     // at least 10 simultaneous missions.
-    private static final int MIN_MISSIONS = 2;
-    private static final int MAX_MISSIONS = 20;          //TODO: SET THESE TO 10 and 200
+    private static final int MIN_MISSIONS = 1;
+    private static final int MAX_MISSIONS = 2;          //TODO: SET THESE TO 10 and 200
 
     private static ExecutorService missionPool = Executors.newFixedThreadPool(50);
 
@@ -33,11 +32,9 @@ public class GroundControl {
 
         // Poll the networks with a thread each
         for(Mission mission : missions) {
-            missionPool.execute(new Runnable() {
-                @Override
-                public void run(){
-                    Network missionNetwork = mission.getNetwork(); 
-
+            
+            Runnable runnable = () -> {
+                Network missionNetwork = mission.getNetwork(); 
                     try {
                         Object obj = missionNetwork.receive();
                         String name = missionNetwork.getName();
@@ -45,8 +42,9 @@ public class GroundControl {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                }         
-            });
+                };
+
+            missionPool.execute(runnable);
         }
 
         // missionPool.shutdown();
