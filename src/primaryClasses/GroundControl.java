@@ -1,10 +1,5 @@
 package primaryClasses;
 
-import java.io.PrintStream;
-import java.io.BufferedOutputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-
 import java.util.concurrent.Executors;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -96,14 +91,10 @@ public class GroundControl {
         
         if (obj instanceof Report) { 
             System.out.println("RR Report Received from " + missionName);
-            String threadinfo = Thread.currentThread().getName();
-            logger.put(missionName + ", " + threadinfo + ", " + obj + ", " + dtf.format(timeStamp));
         }
 
         if (obj instanceof Message) { 
             System.out.println("MM Message Received from " + missionName);
-            String threadinfo = Thread.currentThread().getName();
-            logger.put(missionName + ", " + threadinfo + ", " + obj + ", " + dtf.format(timeStamp));
         }
 
         if (obj instanceof PatchRequest) { 
@@ -121,5 +112,8 @@ public class GroundControl {
             };
             missionPool.execute(responder);
         }
+        
+        String threadinfo = Thread.currentThread().getName();
+        logger.put(missionName + ", " + threadinfo + ", " + obj + ", " + dtf.format(timeStamp));
     }
 }

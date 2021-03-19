@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.time.format.DateTimeFormatter;  
-import java.time.LocalDateTime;    
 
 public class FileLogger implements Runnable {
     String message;
@@ -40,10 +38,11 @@ public class FileLogger implements Runnable {
                     String note = log.get(2);
                     String now = log.get(3);
 
-                    printWriter.print("Mission Component " + mission.substring(mission.length() - 2)
+                    printWriter.print("Mission Component " + mission
                                         + " with" + threadinfo
                                         + " makes request to network at time" + now 
                                         + " for message:" + note + "\n");
+
                 } else if(queue.peek() != null && queue.peek().equals("*")){
                     running = false;
                     close();

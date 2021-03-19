@@ -3,6 +3,8 @@ package primaryClasses;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executors;
 import utils.SimulateRandomAmountOf;
 
@@ -68,13 +70,17 @@ public class Component implements Runnable{
             reporter += " efficiency";
         }
         else {
-            sendData(); //instruments send Data.
+            List<String> instrumentDict = new ArrayList<>();
+            reporter+= " capacity.";
         }
 
 
 
         final String message = reporter;
-        Runnable sendMessage = () -> System.out.printf("%s %s: %s%s. %n", mission, compID, sizeAmount, message);
+        Runnable sendMessage = () -> {
+            String componentNote = mission + " " + compID + ":" + sizeAmount + " " + message;
+            System.out.println(componentNote);
+        };
 
         final ScheduledThreadPoolExecutor scheduler = (ScheduledThreadPoolExecutor)Executors.newScheduledThreadPool(1);
         final ScheduledFuture<?> progressUpdater = scheduler.scheduleAtFixedRate(sendMessage, 2, 10, TimeUnit.SECONDS);
@@ -84,10 +90,5 @@ public class Component implements Runnable{
             scheduler.shutdown();
         };
         scheduler.schedule(progressCanceller, 10, TimeUnit.SECONDS);
-    }
-
-    // instruments send data on a regular basis
-    public synchronized void sendData(){ 
-        // TODO
     }
 }
