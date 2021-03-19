@@ -3,7 +3,7 @@ package primaryClasses;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executors;
 import utils.SimulateRandomAmountOf;
@@ -54,31 +54,33 @@ public class Component implements Runnable{
     }
 
     public synchronized void sendProgressReport(){
-        String reporter = "%";
+        String reporter = "level";
 
         //"fuel", "thrusters", "powerplants", "controlSystems", "instruments"
-        if(this.getID().equals("fuel")){
-            reporter += " level remaining";
+        if(this.getID().equals("instruments")){
+            List<String> instrumentDict = Arrays.asList(" of high energy particle detectors", 
+            " of plasma instruments", " of dust detectors", " of magnetometers", " of spectrometers");
+            int instrument = SimulateRandomAmountOf.size(4);
+            reporter+= instrumentDict.get(instrument);
         } 
-        if(this.getID().equals("thrusters")){
+        else if(this.getID().equals("thrusters")){
             reporter += " performance";
         }
-        if(this.getID().equals("powerplants")){
+        else if(this.getID().equals("powerplants")){
             reporter += " heat dissipated";
         }
-        if(this.getID().equals("controlSystems")){
+        else if(this.getID().equals("controlSystems")){
             reporter += " efficiency";
         }
         else {
-            List<String> instrumentDict = new ArrayList<>();
-            reporter+= " capacity.";
+            reporter += " remaining";
         }
 
 
 
         final String message = reporter;
         Runnable sendMessage = () -> {
-            String componentNote = mission + " " + compID + ":" + sizeAmount + " " + message;
+            String componentNote = mission + " " + compID + ": " + sizeAmount + " " + message;
             System.out.println(componentNote);
         };
 

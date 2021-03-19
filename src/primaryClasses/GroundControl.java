@@ -6,8 +6,13 @@ import java.util.concurrent.ExecutorService;
 import utils.*;
 import dataTypes.*;
 
-import java.time.format.DateTimeFormatter;  
-import java.time.LocalDateTime;  
+import java.time.format.DateTimeFormatter;
+import java.time.LocalDateTime; 
+
+// import java.io.BufferedOutputStream;
+// import java.io.FileNotFoundException;
+// import java.io.FileOutputStream;
+// import java.io.PrintStream;
 
 public class GroundControl {
     // mission controller is a shared resource used for all missions
@@ -15,12 +20,11 @@ public class GroundControl {
     private static final int MIN_MISSIONS = 10;
     private static final int MAX_MISSIONS = 50;
 
-    private static ExecutorService missionPool = Executors.newFixedThreadPool(50);
+    private static int missionCount = SimulateRandomAmountOf.missions(MIN_MISSIONS, MAX_MISSIONS);
+    private static ExecutorService missionPool = Executors.newFixedThreadPool(missionCount);
 
     public static void main(String[] args){
-
-        int missionCount = SimulateRandomAmountOf.missions(MIN_MISSIONS, MAX_MISSIONS);
-       
+    
         // try {
         //     System.setOut(new PrintStream(new BufferedOutputStream(new FileOutputStream("output.txt"))));
         // } catch (FileNotFoundException e1) {
@@ -107,7 +111,7 @@ public class GroundControl {
         if (obj instanceof ResponseRequest) { 
             System.out.println("RQ Response Request Received from " + missionName);
             Runnable responder = () -> {        
-                System.out.println("\t" + "\uD83D\uDE00 <- sending command response to <- " + mission.getID());
+                System.out.println("\t" + mission.getID() + " <- sending command response to <- Ground Control");
                 network.transmitResponse();
             };
             missionPool.execute(responder);
