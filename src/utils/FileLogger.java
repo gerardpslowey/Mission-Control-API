@@ -30,20 +30,19 @@ public class FileLogger implements Runnable {
     public void run() {
         try{
             Thread.sleep(20);
-            // “Mission Component # with (Thread ID) # makes request to network # at time # for message #.”
+            // Mission Component # with (Thread ID) # makes request to network # at time # for message #.
             while(running){
                 if(queue.peek() != null && !queue.peek().equals("*")){
-                    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-                    LocalDateTime now = LocalDateTime.now();
 
                     List<String> log = Arrays.asList(queue.poll().split(","));
                     String mission = log.get(0);
                     String threadinfo = log.get(1);
                     String note = log.get(2);
+                    String now = log.get(3);
 
                     printWriter.print("Mission Component " + mission.substring(mission.length() - 2)
                                         + " with" + threadinfo
-                                        + " makes request to network at time " + dtf.format(now) 
+                                        + " makes request to network at time" + now 
                                         + " for message:" + note + "\n");
                 } else if(queue.peek() != null && queue.peek().equals("*")){
                     running = false;

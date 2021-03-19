@@ -25,7 +25,6 @@ public class Mission implements Runnable {
     private String[] map;
     ExecutorService componentPool = Executors.newFixedThreadPool(10);
 
-
     // Depending on the mission target, each mission must be allocated variable supplies of 
     // fuel, thrusters, instruments, control systems and powerplants
     public Mission(String id, long startTime, CountDownLatch countDownLatch){
@@ -58,7 +57,6 @@ public class Mission implements Runnable {
             // When waiting a mission sleeps
             Thread.sleep(startTime); 
         } catch (InterruptedException e) {
-            //e.printStackTrace();	
             Thread.currentThread().interrupt();
         }
 
@@ -67,8 +65,6 @@ public class Mission implements Runnable {
         }
         
         if(stage.isEmpty()){
-            // Poison pill to end network connection
-            // this.network.transmit("Complete");
             System.out.printf("%s has completed successfully!%n", id);
         }
 
@@ -101,7 +97,6 @@ public class Mission implements Runnable {
         return this.destination;
     }
 
-
     // move missions along their stages
     public void changeStage(){
         int journeyTime = SimulateRandomAmountOf.months();
@@ -114,7 +109,7 @@ public class Mission implements Runnable {
                 if(checkRunning()){
                     // effectively instant events
                     printSuccessStatus(id, stage);
-                    burstOfReports();
+                    burstOfReports(id);
                     setDistance(destination *.1);
                     stage = "transit";
                 } else {
@@ -127,7 +122,7 @@ public class Mission implements Runnable {
                     // takes variable amounts of time to execute (in months)
                     simulateJourneyTime(journeyTime);
                     printSuccessStatus(id, stage);
-                    burstOfReports();
+                    burstOfReports(id);
                     setDistance(destination *.4);
                     stage = "landing";
                 } else {
@@ -139,7 +134,7 @@ public class Mission implements Runnable {
                 if(checkRunning()){
                     // effectively instant events
                     printSuccessStatus(id, stage);
-                    burstOfReports();
+                    burstOfReports(id);
                     setDistance(destination *.5);
                     stage = "explore";
                 } else {
@@ -152,7 +147,7 @@ public class Mission implements Runnable {
                     // takes variable amounts of time to execute (in months)
                     simulateJourneyTime(journeyTime);
                     printSuccessStatus(id, stage);
-                    burstOfReports();
+                    burstOfReports(id);
                     setDistance(destination);
                     stage = "";
                 }
@@ -160,7 +155,7 @@ public class Mission implements Runnable {
                 break;
 
             default:
-                System.out.println("Invalid Argument: " + stage);
+                System.out.println("Invalid Stage: " + stage);
                 break;    
         }
     }
@@ -176,27 +171,29 @@ public class Mission implements Runnable {
             network.transmit(new dataTypes.PatchRequest("request"));
             
             // block until the update arrives 
-            // Object update = network.receiveUpdate();
-            // SoftwareUpdate sw = (SoftwareUpdate) update;
+            Object update = network.receiveUpdate();
+            SoftwareUpdate sw = (SoftwareUpdate) update;
 
-            SoftwareUpdate sw = new SoftwareUpdate(420);
             success = installUpdate(sw);
         }
-
         return success;
     }
 
     // send reports
     // A variable burst of reports and commands are sent at the transition between mission stages.
-    private synchronized void burstOfReports() {
+    private synchronized void burstOfReports(String id) {
         // There are a variable number of types of commands and reports for each mission
         // 30% of reports require a command response
         int chance = SimulateRandomAmountOf.chance();
         int reports = SimulateRandomAmountOf.reports();
-        network.transmit(new Report("hi!!", reports));
+        network.transmit(new Report(reports));
 
         if(chance < 3){
-            GroundControl.commandResponse(this);
+            System.out.println("CR" + id + " Command Response Requested from Ground Control");
+            network.transmit(new ResponseRequest());
+            // wait for a response
+            network.receiveResponse();
+            System.out.println("MR " + id + " Resumed after Response Received");
             }
     }
 
@@ -205,7 +202,6 @@ public class Mission implements Runnable {
         try{ 
             Thread.sleep(journeyTime); 
         } catch (InterruptedException e) {
-            //e.printStackTrace();	
             Thread.currentThread().interrupt();
         }
     }
@@ -225,7 +221,7 @@ public class Mission implements Runnable {
         }
         else{
             showUpdateProgress(update);
-            System.out.printf("++ %s software upgrade successfully applied.%n", id);
+            System.out.printf("✓ %s software upgrade successfully applied.%n", id);
             return true;
         }
     }
@@ -242,7 +238,6 @@ public class Mission implements Runnable {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
-                //e.printStackTrace();	
                 Thread.currentThread().interrupt();
             }
         }

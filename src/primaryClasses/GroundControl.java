@@ -1,10 +1,18 @@
 package primaryClasses;
 
+import java.io.PrintStream;
+import java.io.BufferedOutputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import utils.*;
 import dataTypes.*;
+
+import java.time.format.DateTimeFormatter;  
+import java.time.LocalDateTime;  
 
 public class GroundControl {
     // mission controller is a shared resource used for all missions
@@ -17,7 +25,13 @@ public class GroundControl {
     public static void main(String[] args){
 
         int missionCount = SimulateRandomAmountOf.missions(MIN_MISSIONS, MAX_MISSIONS);
-        
+       
+        // try {
+        //     System.setOut(new PrintStream(new BufferedOutputStream(new FileOutputStream("output.txt"))));
+        // } catch (FileNotFoundException e1) {
+        //     e1.printStackTrace();
+        // }
+
         System.out.println("Number of Simultaneous Missions: " + missionCount);
         // Each mission can be represented using threads
         // use a thread pool for tasks
@@ -37,18 +51,18 @@ public class GroundControl {
 
         // Poll the networks with a thread each
         for(Mission mission : missions) {
-            Runnable runnable = () -> {
-                Network missionNetwork = mission.getNetwork(); 
+            Runnable networkListener = () -> {
+                while(!mission.getStageEmpty()){
+                    Network missionNetwork = mission.getNetwork(); 
                     try {
                         Object obj = missionNetwork.receive();
-                        String name = missionNetwork.getName();
-                        process(obj, name, missionNetwork, logger);
+                        process(obj, mission, logger);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                };
-
-            missionPool.execute(runnable);
+                }
+            };
+        missionPool.execute(networkListener);
         }
 
         missionPool.shutdown();
@@ -62,31 +76,34 @@ public class GroundControl {
             for(Mission mission : missions) {
                 //if the stage is not empty and the mission is finished, then uh oh
                 if(!mission.getStageEmpty() && !mission.getMissionProgress() ){
-                    
-                    System.out.println("Oh No! " + mission.getID() + " failed.");
+                    // Any missions which loose progress have been hit by a solar flare
+                    System.out.println("Oh No! " + mission.getID() + " hit by solar flare.");
                     runner = false;
                 }
             }
             new RocketMan(runner);
 
         } catch (InterruptedException e){
-            //e.printStackTrace();	
             Thread.currentThread().interrupt();
         }
     }
 
-    private static void process(Object obj, String missionName, Network network, FileLogger logger){
+    private static void process(Object obj, Mission mission, FileLogger logger){
+        String missionName = mission.getID();
+        Network network = mission.getNetwork();
+        LocalDateTime timeStamp = LocalDateTime.now();
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+        
         if (obj instanceof Report) { 
             System.out.println("RR Report Received from " + missionName);
-            System.out.println("\t" + "Contents: " + obj);
             String threadinfo = Thread.currentThread().getName();
-            logger.put(missionName + ", " + threadinfo + ", " + obj);
+            logger.put(missionName + ", " + threadinfo + ", " + obj + ", " + dtf.format(timeStamp));
         }
 
         if (obj instanceof Message) { 
-            System.out.println("MM Message Received from " + missionName + "\n" + "\t" + "Contents: " + obj + "\n");
+            System.out.println("MM Message Received from " + missionName);
             String threadinfo = Thread.currentThread().getName();
-            logger.put(missionName + ", " + threadinfo + ", " + obj);
+            logger.put(missionName + ", " + threadinfo + ", " + obj + ", " + dtf.format(timeStamp));
         }
 
         if (obj instanceof PatchRequest) { 
@@ -95,14 +112,15 @@ public class GroundControl {
             // Software upgrades must be transmitted from the mission controller
             missionPool.execute(new SoftwareUpdater(network));
         }
-    }
 
-    public static synchronized void commandResponse(Mission mission){
-        Network network = mission.getNetwork();
-        // Object x = network.receive();
-
-        System.out.println("\uD83D\uDE00 <- command response to <- " + mission.getID());
-        network.transmitUpdate("Response");
-        // mission.notifyAll();
+        if (obj instanceof ResponseRequest) { 
+            System.out.println("RQ Response Request Received from " + missionName);
+            Runnable responder = () -> {        
+                System.out.println("\t" + "\uD83D\uDE00 <- sending command response to <- " + mission.getID());
+                network.transmitResponse();
+            };
+        
+            missionPool.execute(responder);
+        }
     }
 }

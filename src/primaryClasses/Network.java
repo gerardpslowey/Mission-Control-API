@@ -16,7 +16,8 @@ public class Network {
 
     // represent the communications networks (queues) 
     private BlockingQueue<Object> inputData;
-    private final BlockingQueue<Object> outputData;
+    private BlockingQueue<Object> outputData;
+    private BlockingQueue<Object> responseData;
 
     public Network(String name) {
         this.name = name;
@@ -27,6 +28,7 @@ public class Network {
         this.latency = setNetworkLatency(0);
         this.inputData = new LinkedBlockingQueue<>(bandwidth);
         this.outputData = new LinkedBlockingQueue<>(bandwidth);
+        this.responseData = new LinkedBlockingQueue<>(bandwidth);
     }
 
     // three types of deep space communications
@@ -88,9 +90,6 @@ public class Network {
 
     public Object receive() {
         try{            
-            // simulate latency on the network
-            Thread.sleep(simulateLatency());
-            
             return this.inputData.take();
         } catch (InterruptedException e) { 
             Thread.currentThread().interrupt();        
@@ -100,9 +99,6 @@ public class Network {
 
     public Object receiveUpdate() {
         try{            
-            // simulate latency on the network
-            Thread.sleep(simulateLatency());
-            
             return this.outputData.take();
         } catch (InterruptedException e) { 
             Thread.currentThread().interrupt();        
@@ -110,8 +106,18 @@ public class Network {
         return "";
     } 
 
+    public Object receiveResponse() {
+        try{                        
+            return this.responseData.take();
+        } catch (InterruptedException e) { 
+            Thread.currentThread().interrupt();        
+        } 
+        return "";
+    }
+
     public void transmit(Object data){
         try{
+            Thread.sleep(simulateLatency());
             this.inputData.put(data);
         } catch (InterruptedException e) { 
             Thread.currentThread().interrupt();        
@@ -120,10 +126,21 @@ public class Network {
 
     public void transmitUpdate(Object data){
         try{
+            Thread.sleep(simulateLatency());
             this.outputData.put(data);
         } catch (InterruptedException e) { 
             Thread.currentThread().interrupt();        
         }  
+    }
+
+    public void transmitResponse() {
+        try{            
+            // simulate latency on the network
+            Thread.sleep(simulateLatency());
+            this.responseData.put("Response");
+        } catch (InterruptedException e) { 
+            Thread.currentThread().interrupt();        
+        } 
     }
 
     public void replyToPing(){
