@@ -231,12 +231,13 @@ public class Mission implements Runnable {
 
         // TODO change this depending on bandwidth and update size
         int updateSize = update.getUpdateSize();
+        int sleepTime = updateSize/10;
 
         for (int i = 0; i <= 100; i+=10) {
             System.out.print("Installing: " + i + "% " + animationChars[i % 4] + "\r");
 
             try {
-                Thread.sleep(100);
+                Thread.sleep((long) sleepTime * 100);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }

@@ -119,7 +119,6 @@ public class GroundControl {
                 System.out.println("\t" + "\uD83D\uDE00 <- sending command response to <- " + mission.getID());
                 network.transmitResponse();
             };
-        
             missionPool.execute(responder);
         }
     }
