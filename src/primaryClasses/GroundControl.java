@@ -30,6 +30,7 @@ public class GroundControl {
 
     public static void main(String[] args){
     
+        // used to write output to file instead of terminal
         // try {
         //     System.setOut(new PrintStream(new BufferedOutputStream(new FileOutputStream("output.txt"))));
         // } catch (FileNotFoundException e1) {
@@ -39,7 +40,6 @@ public class GroundControl {
         System.out.println("Number of Simultaneous Missions: " + missionCount);
         // Each mission can be represented using threads
         // use a thread pool for tasks
-        ExecutorService missionPool = Executors.newFixedThreadPool(50);
         CountDownLatch latch = new CountDownLatch(missionCount);
 		Mission[] missions = new Mission[missionCount];
 
