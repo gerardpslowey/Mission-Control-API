@@ -229,15 +229,11 @@ public class Mission implements Runnable {
     public static void showUpdateProgress(SoftwareUpdate update) {
         char[] animationChars = new char[]{'|', '/', '-', '\\'};
 
-        // TODO change this depending on bandwidth and update size
-        int updateSize = update.getUpdateSize();
-        int sleepTime = updateSize/10;
-
         for (int i = 0; i <= 100; i+=10) {
-            System.out.print("Installing: " + i + "% " + animationChars[i % 4] + "\r");
+            System.out.print("Installing update " + update.getUpdateSize() + " mb:" + i + "% " + animationChars[i % 4] + "\r");
 
             try {
-                Thread.sleep((long) sleepTime * 100);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
