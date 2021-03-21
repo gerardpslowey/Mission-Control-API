@@ -76,6 +76,8 @@ public class Component implements Runnable{
             reporter += " remaining";
         }
 
+
+
         final String message = reporter;
         Runnable sendMessage = () -> {
             String componentNote = mission + " " + compID + ": " + sizeAmount + " " + message;

@@ -6,13 +6,8 @@ import java.util.concurrent.ExecutorService;
 import utils.*;
 import dataTypes.*;
 
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-
-import java.util.concurrent.ThreadPoolExecutor;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime; 
-import java.util.concurrent.TimeUnit;
 
 // import java.io.BufferedOutputStream;
 // import java.io.FileNotFoundException;
@@ -30,7 +25,6 @@ public class GroundControl {
 
     public static void main(String[] args){
     
-        // used to write output to file instead of terminal
         // try {
         //     System.setOut(new PrintStream(new BufferedOutputStream(new FileOutputStream("output.txt"))));
         // } catch (FileNotFoundException e1) {
@@ -40,10 +34,10 @@ public class GroundControl {
         System.out.println("Number of Simultaneous Missions: " + missionCount);
         // Each mission can be represented using threads
         // use a thread pool for tasks
+        ExecutorService missionPool = Executors.newFixedThreadPool(50);
         CountDownLatch latch = new CountDownLatch(missionCount);
 		Mission[] missions = new Mission[missionCount];
 
-        ScheduledExecutorService ses = Executors.newScheduledThreadPool(1);
         ExecutorService logPool = Executors.newSingleThreadExecutor();
         FileLogger logger = new FileLogger();
         logPool.execute(logger);
@@ -71,24 +65,11 @@ public class GroundControl {
         }
 
         missionPool.shutdown();
-
-        Runnable threadPoolAnalysis = () -> {
-            System.out.println("\nTHREAD POOL REPORTING:");
-            System.out.println("Currently executing threads: "+ ((ThreadPoolExecutor) missionPool).getActiveCount()); 
-            System.out.println("Currently executing tasks: "+ ((ThreadPoolExecutor) missionPool).getTaskCount());
-            System.out.println("Current thread pool size: "+ ((ThreadPoolExecutor) missionPool).getPoolSize() + "\n");
-        };
-
-        // run every 10 seconds after an inital 10 second delay
-        ScheduledFuture<?> scheduledFuture = ses.scheduleAtFixedRate(threadPoolAnalysis, 10, 10, TimeUnit.SECONDS);
         
         try{
             latch.await();
             logPool.shutdown();
             logger.put("*");
-
-            scheduledFuture.cancel(true);
-            ses.shutdown();
 
             boolean runner = true;
             for(Mission mission : missions) {
@@ -109,7 +90,6 @@ public class GroundControl {
     private static void process(Object obj, Mission mission, FileLogger logger){
         String missionName = mission.getID();
         Network network = mission.getNetwork();
-        String newtorkID = network.getName();
         LocalDateTime timeStamp = LocalDateTime.now();
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
         
@@ -138,6 +118,6 @@ public class GroundControl {
         }
         
         String threadinfo = Thread.currentThread().getName();
-        logger.put(missionName + ", " + threadinfo + ", " + obj + ", " + newtorkID + dtf.format(timeStamp));
+        logger.put(missionName + ", " + threadinfo + ", " + obj + ", " + dtf.format(timeStamp));
     }
 }
