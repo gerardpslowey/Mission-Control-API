@@ -9,11 +9,6 @@ import dataTypes.*;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime; 
 
-// import java.io.BufferedOutputStream;
-// import java.io.FileNotFoundException;
-// import java.io.FileOutputStream;
-// import java.io.PrintStream;
-
 public class GroundControl {
     // mission controller is a shared resource used for all missions
     // at least 10 simultaneous missions.
@@ -21,20 +16,13 @@ public class GroundControl {
     private static final int MAX_MISSIONS = 50;
 
     private static int missionCount = SimulateRandomAmountOf.missions(MIN_MISSIONS, MAX_MISSIONS);
-    private static ExecutorService missionPool = Executors.newFixedThreadPool(missionCount);
 
     public static void main(String[] args){
-    
-        // try {
-        //     System.setOut(new PrintStream(new BufferedOutputStream(new FileOutputStream("output.txt"))));
-        // } catch (FileNotFoundException e1) {
-        //     e1.printStackTrace();
-        // }
 
         System.out.println("Number of Simultaneous Missions: " + missionCount);
         // Each mission can be represented using threads
         // use a thread pool for tasks
-        ExecutorService missionPool = Executors.newFixedThreadPool(50);
+        ExecutorService missionPool = Executors.newFixedThreadPool(missionCount);
         CountDownLatch latch = new CountDownLatch(missionCount);
 		Mission[] missions = new Mission[missionCount];
 
@@ -76,7 +64,7 @@ public class GroundControl {
                 //if the stage is not empty and the mission is finished, then uh oh
                 if(!mission.getStageEmpty() && !mission.getMissionProgress() ){
                     // Any missions which loose progress have been hit by a solar flare
-                    System.out.println("Oh No! " + mission.getID() + " hit by solar flare.");
+                    System.out.println("Oh No! " + mission.getID() + " failed.");
                     runner = false;
                 }
             }
@@ -92,6 +80,7 @@ public class GroundControl {
         Network network = mission.getNetwork();
         LocalDateTime timeStamp = LocalDateTime.now();
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+        ExecutorService missions = Executors.newFixedThreadPool(2);
         
         if (obj instanceof Report) { 
             System.out.println("RR Report Received from " + missionName);
@@ -105,7 +94,7 @@ public class GroundControl {
             System.out.println("PR Patch Request Received from " + missionName + "\n");
             // 25% of failures can be recovered from by sending a software upgrade
             // Software upgrades must be transmitted from the mission controller
-            missionPool.execute(new SoftwareUpdater(network));
+            missions.execute(new SoftwareUpdater(network));
         }
 
         if (obj instanceof ResponseRequest) { 
@@ -114,7 +103,7 @@ public class GroundControl {
                 System.out.println("\t" + mission.getID() + " <- sending command response to <- Ground Control");
                 network.transmitResponse();
             };
-            missionPool.execute(responder);
+            missions.execute(responder);
         }
         
         String threadinfo = Thread.currentThread().getName();
